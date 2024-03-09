@@ -24,12 +24,12 @@ struct point{
 	}
 };
 
-int Ajuste(int i){
+int Ajuste(int i, int adjust){
 	cout << "aqui7" << endl;
-	if(i >= 0 and i <= 99){
+	if(i >= 0 and i <= adjust){
 		return i;
-	}else if(i > 99){
-		return 99;
+	}else if(i > adjust){
+		return adjust;
 	}else {
 		return 0;
 	}
@@ -38,29 +38,32 @@ int Ajuste(int i){
 
 void CalculoCasilla(int i,const state &st, const vector<vector<unsigned char>> &matriz, bool orden, point &p, bool &no_vacio){
 	cout << "aqui6" << endl;
-	int j = -4;
-	while (no_vacio and orden){
-		while(no_vacio and j <= 4){
-			if(matriz.at(Ajuste(st.fil+i)).at(Ajuste(st.col + j)) == '?'){
+	int j = i;
+	if (orden){
+		while(no_vacio and j <= -i){
+			if(matriz.at(Ajuste(st.fil+i,matriz.size()-1)).at(Ajuste(st.col + j,matriz.size()-1)) == '?'){
 				no_vacio = false; 
-				p.fil = Ajuste(st.fil+i);
-				p.col = Ajuste(st.col + j);
+				p.fil = Ajuste(st.fil+i,matriz.size()-1);
+				p.col = Ajuste(st.col + j,matriz.size()-1);
 
 			}
 			j++;
+			cout << j << endl;
 		}
-	}
-	while (no_vacio and !orden){
-		while(no_vacio and j <= 4){
-			if(matriz.at(Ajuste(st.fil+j)).at(Ajuste(st.col + i)) == '?'){
+	}else{
+		
+		while(no_vacio and j <= -i){
+			if(matriz.at(Ajuste(st.fil+j,matriz.size()-1)).at(Ajuste(st.col + i,matriz.size()-1)) == '?'){
 				no_vacio = false; 
-				p.fil = Ajuste(st.fil + j);
-				p.col = Ajuste(st.col + i);
+				p.fil = Ajuste(st.fil + j,matriz.size()-1);
+				p.col = Ajuste(st.col + i,matriz.size()-1);
 
 			}
 			j++;
+			cout << j << endl;
 		}
 	}
+	
 
 }
 
@@ -105,11 +108,14 @@ void Actualizar(int &x,int &y, const Orientacion &brujula){
 void CambiaDir(int init, priority_queue<rutina> &pq, int there){
 	cout << "aqui4" << endl;
 
+	cout << init << endl;
+	cout << there << endl;
+
 	if(init == there){
 	}
 	else if((there-init+8)%8 <= 3){
 		pq.push(rutina(actTURN_SR,30 - pq.size()));
-		CambiaDir((init+1)%7,pq,there);
+		CambiaDir((init+1)%8,pq,there);
 	}
 	else{
 		pq.push(rutina(actTURN_L,30 - pq.size()));
@@ -124,16 +130,18 @@ point ExploracionLocal(const state &st, const vector<vector<unsigned char>> &mat
 	bool no_vacio = true;
 
 	point p = point(st.fil, st.col);
-
-	CalculoCasilla(-i,st,matriz, 0, p, no_vacio);
-	if(no_vacio){
-		CalculoCasilla(-i,st,matriz, 1, p, no_vacio);
+	while(no_vacio and i > -8){
+		CalculoCasilla(-i,st,matriz, 0, p, no_vacio);
 		if(no_vacio){
-			CalculoCasilla(i,st,matriz, 0, p, no_vacio);
+			CalculoCasilla(-i,st,matriz, 1, p, no_vacio);
 			if(no_vacio){
-				CalculoCasilla(i,st,matriz, 1, p, no_vacio);
+				CalculoCasilla(i,st,matriz, 0, p, no_vacio);
+				if(no_vacio){
+					CalculoCasilla(i,st,matriz, 1, p, no_vacio);
+				}
 			}
 		}
+		i--;
 	}
 
 	return p;
@@ -144,49 +152,31 @@ point ExploracionLocal(const state &st, const vector<vector<unsigned char>> &mat
 
 Orientacion CalOrientacion(point a, point b){
 	cout << "aqui2" << endl;
-	int x = b.fil - a.fil;
-	int y = b.col - a.col;
+	int x = b.col - a.col;
+	int y = b.fil - a.fil;
 	Orientacion tmp;
 
-	if(x = 0){
-		if (y > 0){
-			tmp = Orientacion::norte;
-		}else{
-			tmp = Orientacion::sur;
-		}
-	}
-	else if(y = 0){
+	cout << "valorx" << x << endl;
+	cout << "valory" << y << endl;
+
+
+	if(y = 0){
 		if (x > 0){
 			tmp = Orientacion::este;
 		}else{
 			tmp = Orientacion::oeste;
 		}
+	}
+	else if(x = 0){
+		if (y > 0){
+			tmp = Orientacion::sur;
+		}else{
+			tmp = Orientacion::norte;
+		}
 	}else{
 		double z = 1.0*y/x;
 		if (z > 0){
-			if(x > 0){
-				if(z > sqrt(3)){
-					tmp = Orientacion::norte;
-
-				} else if(z < 1/sqrt(3)){
-					tmp = Orientacion::este;
-				}else{
-					tmp = Orientacion::noreste; 
-				}
-
-			}else {
-				if(z > sqrt(3)){
-					tmp = Orientacion::sur;
-
-				} else if(z < 1/sqrt(3)){
-					tmp = Orientacion::oeste;
-
-				}else{
-					tmp = Orientacion::suroeste;
-				}
-			}
-		}else{
-			if(x > 0){
+			if(y > 0){
 				if(z > sqrt(3)){
 					tmp = Orientacion::sur;
 
@@ -196,15 +186,41 @@ Orientacion CalOrientacion(point a, point b){
 					tmp = Orientacion::sureste; 
 				}
 
-			}else{
+			}else {
 				if(z > sqrt(3)){
 					tmp = Orientacion::norte;
 
 				} else if(z < 1/sqrt(3)){
+					tmp = Orientacion::este;
+
+				}else{
+					tmp = Orientacion::noreste;
+				}
+				
+				
+			}
+		}else{
+			if(y > 0){
+				if(-z > sqrt(3)){
+					tmp = Orientacion::sur;
+
+				} else if(-z < 1/sqrt(3)){
 					tmp = Orientacion::oeste;
 				}else{
-					tmp = Orientacion::noroeste; 
+					tmp = Orientacion::suroeste; 
 				}
+
+			}else{
+				if(-z > sqrt(3)){
+					tmp = Orientacion::norte;
+
+				} else if(-z < 1/sqrt(3)){
+					tmp = Orientacion::este;
+				}else{
+					tmp = Orientacion::noreste; 
+				}
+				
+				
 			}
 		}
 	}
@@ -224,7 +240,7 @@ point MasVacio(const vector<vector<unsigned char>> &matriz){
 	int max_i_counter = 0;
 	vector<int> j_vector;
 	vector<int> i_vector;
-	for(int i = 3; i< matriz.size()-3; i++){
+	for(int i = 0; i< matriz.size(); i++){
 		j_vector.push_back(0);
 		i_vector.push_back(0);
 	}
@@ -263,17 +279,21 @@ void NuevaRuta(const state &st, const vector<vector<unsigned char>> &matriz, pri
 		q = MasVacio(matriz);
 	}
 
+	cout << p.fil << "," << p.col << endl;
+	cout << q.fil << "," << q.col << endl;
+
 	CambiaDir(st.brujula,pq,CalOrientacion(p,q));
 
 }
 
 void RutinaExploracion(const vector<unsigned char> & terreno, Action &accion, unsigned int &algoritmo, const state &st, const vector<vector<unsigned char>> &matriz, priority_queue<rutina> &pq){
+	cout << "aqui10" << endl;
 	point p(st.fil,st.col);
 	for(int i = 0; i <4; i++){
 		Actualizar(p.fil,p.col,st.brujula);
 	}
-	p.fil = Ajuste(p.fil);
-	p.col = Ajuste(p.col);
+	p.fil = Ajuste(p.fil,matriz.size()-1);
+	p.col = Ajuste(p.col,matriz.size()-1);
 	
 	if((terreno[2] == 'T' or terreno[2] =='S' or terreno[2] == 'G' or terreno[2] == 'B' )
 		and (matriz.at(p.fil).at(p.col) == '?')){
@@ -281,21 +301,26 @@ void RutinaExploracion(const vector<unsigned char> & terreno, Action &accion, un
 		}
 		else if((matriz.at(p.fil).at(p.col) == '?')) {
 			accion =actTURN_L;
-			algoritmo = 1;
+			algoritmo = 0;
 		}else{
 			NuevaRuta(st,matriz,pq);
 		}
 }
 
 void RutinaBasica(const vector<unsigned char> & terreno, Action &accion, unsigned int &algoritmo){
+	cout << "aqui11" << endl;
 	if((terreno[2] == 'T' or terreno[2] =='S' or terreno[2] == 'G' or terreno[2] == 'B' )){
 			accion = actWALK;
 			algoritmo = 0;
 	}
 	else {
 		accion =actTURN_L;
-		algoritmo = 1;
+		algoritmo = 0;
 	}
+
+}
+
+void Conduce(const state &st, vector<vector<unsigned char>> &matriz){
 
 }
 
@@ -431,7 +456,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 	{
 		accion = prioridad.top().accion;
 		prioridad.pop();
-		algoritmo = 50;
+		algoritmo = 0;
 		return accion;
 	}
 
@@ -454,7 +479,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 			}else {
 				RutinaBasica(sensores.terreno,accion,algoritmo);
 				if (rand()%8 == 0){
-					
+					RutinaExploracion(sensores.terreno,accion,algoritmo,current_state,mapaResultado,prioridad);
 				}
 			}
 
@@ -491,6 +516,10 @@ Action ComportamientoJugador::think(Sensores sensores)
 			break;
 		}
 	default:
+		RutinaBasica(sensores.terreno,accion,algoritmo);
+		if (rand()%8 == 0){
+			RutinaExploracion(sensores.terreno,accion,algoritmo,current_state,mapaResultado,prioridad);
+		}
 		break;
 	}
 
@@ -498,7 +527,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 	{
 		accion = prioridad.top().accion;
 		prioridad.pop();
-		algoritmo = 50;
+		algoritmo = 0;
 		return accion;
 	}
 	
