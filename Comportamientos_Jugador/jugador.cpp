@@ -2,27 +2,14 @@
 #include <iostream>
 #include<queue>
 #include<math.h>
+#include<set>
 #include<tgmath.h>
 
 using namespace std;
 
 
 
-struct point{
-	int fil;
-	int col;
-	point(int i,int j)
-	{
-		fil = i;
-		col = j;
-	}
-	bool operator==(point &p){
-		return (fil == p.fil) and (col == p.col);
-	}
-	bool operator!=(point &p){
-		return !(*this==p);
-	}
-};
+
 
 int Ajuste(int i, int adjust){
 	cout << "aqui7" << endl;
@@ -41,10 +28,10 @@ void CalculoCasilla(int i,const state &st, const vector<vector<unsigned char>> &
 	int j = i;
 	if (orden){
 		while(no_vacio and j <= -i){
-			if(matriz.at(Ajuste(st.fil+i,matriz.size()-1)).at(Ajuste(st.col + j,matriz.size()-1)) == '?'){
+			if(matriz.at(Ajuste(st.p.fil+i,matriz.size()-1)).at(Ajuste(st.p.col + j,matriz.size()-1)) == '?'){
 				no_vacio = false; 
-				p.fil = Ajuste(st.fil+i,matriz.size()-1);
-				p.col = Ajuste(st.col + j,matriz.size()-1);
+				p.fil = Ajuste(st.p.fil+i,matriz.size()-1);
+				p.col = Ajuste(st.p.col + j,matriz.size()-1);
 
 			}
 			j++;
@@ -53,10 +40,10 @@ void CalculoCasilla(int i,const state &st, const vector<vector<unsigned char>> &
 	}else{
 		
 		while(no_vacio and j <= -i){
-			if(matriz.at(Ajuste(st.fil+j,matriz.size()-1)).at(Ajuste(st.col + i,matriz.size()-1)) == '?'){
+			if(matriz.at(Ajuste(st.p.fil + j,matriz.size()-1)).at(Ajuste(st.p.col + i,matriz.size()-1)) == '?'){
 				no_vacio = false; 
-				p.fil = Ajuste(st.fil + j,matriz.size()-1);
-				p.col = Ajuste(st.col + i,matriz.size()-1);
+				p.fil = Ajuste(st.p.fil + j,matriz.size()-1);
+				p.col = Ajuste(st.p.col + i,matriz.size()-1);
 
 			}
 			j++;
@@ -129,7 +116,7 @@ point ExploracionLocal(const state &st, const vector<vector<unsigned char>> &mat
 
 	bool no_vacio = true;
 
-	point p = point(st.fil, st.col);
+	point p = point(st.p.fil, st.p.col);
 	while(no_vacio and i > -8){
 		CalculoCasilla(-i,st,matriz, 0, p, no_vacio);
 		if(no_vacio){
@@ -272,7 +259,7 @@ point MasVacio(const vector<vector<unsigned char>> &matriz){
 
 void NuevaRuta(const state &st, const vector<vector<unsigned char>> &matriz, priority_queue<rutina> &pq){
 	cout << "aqui9" << endl;
-	point p(st.fil,st.col);
+	point p(st.p.fil,st.p.col);
 	point q = ExploracionLocal(st,matriz);
 
 	if(p == q){
@@ -288,7 +275,7 @@ void NuevaRuta(const state &st, const vector<vector<unsigned char>> &matriz, pri
 
 void RutinaExploracion(const vector<unsigned char> & terreno, Action &accion, unsigned int &algoritmo, const state &st, const vector<vector<unsigned char>> &matriz, priority_queue<rutina> &pq){
 	cout << "aqui10" << endl;
-	point p(st.fil,st.col);
+	point p(st.p);
 	for(int i = 0; i <4; i++){
 		Actualizar(p.fil,p.col,st.brujula);
 	}
@@ -320,8 +307,21 @@ void RutinaBasica(const vector<unsigned char> & terreno, Action &accion, unsigne
 
 }
 
-void Conduce(const state &st, vector<vector<unsigned char>> &matriz){
+void Explorar(priority_queue<rutina> &pq,const vector<vector<casilla>> &matriz,casilla target){
+	set<casilla> visitados; 
+	priority_queue<casilla> target; 
 
+	
+
+
+}
+
+void Actualizar(){
+
+}
+
+void Colocar(){
+	
 }
 
 void PonerTerrenoEnMatriz(const vector<unsigned char> & terreno, const state &st, vector<vector<unsigned char>> &matriz){
@@ -369,7 +369,7 @@ void PonerTerrenoEnMatriz(const vector<unsigned char> & terreno, const state &st
     if(st.brujula%2 == 0){
         for (int j = 0; j <= 3; j++){
             for(int i = -j; i <= j; i++){
-                matriz.at(st.fil +i*y +j*x).at(st.col -i*x +j*y) = terreno.at(j*(j+1)+i);
+                matriz.at(st.p.fil +i*y +j*x).at(st.p.col -i*x +j*y) = terreno.at(j*(j+1)+i);
             }
         }
     }
@@ -377,11 +377,11 @@ void PonerTerrenoEnMatriz(const vector<unsigned char> & terreno, const state &st
         for (int j = 0; j <= 3; j++){
 
             for(int i = -j; i < 0; i++){
-                matriz.at(st.fil +j*x).at(st.col + i*y +j*y) = terreno.at(j*(j+1)+i*(-1)*x*y);
+                matriz.at(st.p.fil +j*x).at(st.p.col + i*y +j*y) = terreno.at(j*(j+1)+i*(-1)*x*y);
             }
 
             for(int i = 0; i <= j; i++){
-                matriz.at(st.fil -i*x +j*x).at(st.col +j*y) = terreno.at(j*(j+1)+i*(-1)*x*y);
+                matriz.at(st.p.fil -i*x +j*x).at(st.p.col +j*y) = terreno.at(j*(j+1)+i*(-1)*x*y);
             }
         }
     }
@@ -423,7 +423,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 	switch (last_action)
 	{
 	case actWALK:
-		Actualizar(current_state.fil,current_state.col,current_state.brujula);
+		Actualizar(current_state.p.fil,current_state.p.col,current_state.brujula);
 			break;
 	case actRUN:
 
@@ -445,8 +445,8 @@ Action ComportamientoJugador::think(Sensores sensores)
 	//Pintamos mapa
 	
 	if (bien_situado){
-		current_state.fil = sensores.posF;
-		current_state.col = sensores.posC;
+		current_state.p.fil = sensores.posF;
+		current_state.p.col = sensores.posC;
 		current_state.brujula = sensores.sentido;
 		PonerTerrenoEnMatriz(sensores.terreno,current_state,mapaResultado);
 	}
