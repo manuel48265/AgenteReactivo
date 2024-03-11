@@ -3,12 +3,13 @@
 #include "comportamientos/comportamiento.hpp"
 #include "queue"
 #include "cmath"
+#include "iostream"
 
 
 using namespace std;
 
 int CBateria(unsigned char v, bool zapatillas, bool bikini, bool correr, bool girar);
-int ValCasilla(unsigned char v, bool zapatillas, bool bikini);
+int ValCasilla(unsigned char v, const vector<bool> &condiciones);
 
 struct point{
 	int fil;
@@ -33,8 +34,8 @@ struct point{
     copy(p);
   }
 
-  int dis(point &a, int tam){
-    return(max(abs((this->fil - a.fil + tam)%tam),abs((this->col - a.col + tam)%tam));
+  int dis(const point &a, int tam)const {
+    return(max(abs((this->fil - a.fil + tam)%tam),abs((this->col - a.col + tam)%tam)));
   }
 
   bool operator ==(point &p);
@@ -74,6 +75,13 @@ struct casilla
   int valoracion;
   int generado;
   casilla* padre;
+
+  casilla(){
+    p = point(0,0);
+    valor = '?';
+    valoracion = -1;
+    padre = nullptr;
+  }
 
   casilla(int x, int y){
     p = point(x,y);
@@ -124,8 +132,8 @@ struct casilla
   void setPadre(casilla a){
     padre = &a;
   }
-  int dis(casilla a){
-    return p.dis(a.p);
+  int dis(casilla a,int tam){
+    return p.dis(a.p,tam);
   }
   /*
   Condiciones:
@@ -143,24 +151,26 @@ struct casilla
   */
   
   
-  void CalculaValoracion (const state &st,const vector<vector<casillas>> &matriz){
+  void CalculaValoracion (const state &st,const vector<vector<casilla>> &matriz){
     int intervalo = -4;
     int sum = 0;
     int tam = matriz.size();
 
-    if(matriz.at(st.p_virtual).at(st.p_virtual) == 'M' or matriz.at(st.p_virtual).at(st.p_virtual) == 'P'){
+    cout << "hola4" << endl;
+
+    if(matriz.at((st.p_virtual.fil + tam)%tam).at((st.p_virtual.col + tam)%tam).valor == 'M' or matriz.at((st.p_virtual.fil + tam)%tam).at((st.p_virtual.col + tam)%tam).valor == 'P'){
       sum = -5000;
     }else{
       for(int i = -intervalo; i <= intervalo; i++){
         for (int j = -intervalo; j <= intervalo; j++){
-          if(matriz.at(st.p_virtual +i).at(st.p_virtual+j) == '?'){
+          if(matriz.at((st.p_virtual.fil + i + tam)%tam).at((st.p_virtual.col + j + tam)%tam).valor == '?'){
             
-            double val = ValCasilla(matriz.at((st.p_virtual.fil + i + tam)%tam).at((st.p_virtual.col + j + tam)%tam),st.condiciones);
+            double val = ValCasilla(matriz.at((st.p_virtual.fil + i + tam)%tam).at((st.p_virtual.col + j + tam)%tam).valor,st.condiciones);
 
             if (val > 0){
-              sum += val*pow((point((st.p_virtual.fil + i + tam)%tam,(st.p_virtual.col + j + tam)%tam).dis(st.target)),2);
+              sum += val/(point((st.p_virtual.fil + i + tam)%tam,(st.p_virtual.col + j + tam)%tam).dis(st.target,tam));
             }else{
-              sum += val/pow((point((st.p_virtual.fil + i + tam)%tam,(st.p_virtual.col + j + tam)%tam).dis(st.target)),2);
+              sum += val/(point((st.p_virtual.fil + i + tam)%tam,(st.p_virtual.col + j + tam)%tam).dis(st.target,tam));
             }
           }
         }
@@ -186,8 +196,8 @@ class ComportamientoJugador : public Comportamiento{
       current_state.p_real = point(0,0);
       current_state.brujula_real = norte;
       current_state.target = point(5,5);
-      for(int i = 0; i <= 4; i++){
-        current_state.condiciones.at(i) = false; 
+      for(int i = 0; i < 4; i++){
+        current_state.condiciones.push_back(false); 
       }
 
       last_action = actIDLE;
@@ -213,6 +223,7 @@ class ComportamientoJugador : public Comportamiento{
         matriz.at(i).at(j) = matriz.at(j).at(i) = matriz.at(matriz.size() -1 - j).at(i) = matriz.at(i).at(matriz.size() -1 - j) ='P';
       }
     }
+    cout << "llega" << endl;
 }
 
   private:
