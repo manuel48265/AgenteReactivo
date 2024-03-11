@@ -757,11 +757,13 @@ Action ComportamientoJugador::think(Sensores sensores){
 			switch (current_state.p_virtual.dis(point((current_state.p_virtual.fil+i + tam)%tam,(current_state.p_virtual.col+j + tam)%tam),tam))
 			{
 			case 0:
+				cout << "hola21" << endl;
 				c = mapa_aux.at((current_state.p_virtual.fil+i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam);
 				val_idle = c.valoracion - 200;
 				max_idle = c.p ;
 			break;
 			case 1:
+				cout << "hola22" << endl;
 				c = mapa_aux.at((current_state.p_virtual.fil+i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam);
 				c.valoracion -= 2*CBateria(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).valor,current_state.condiciones.at(2),current_state.condiciones.at(3),false, false);
 				if(val_walk < c.valoracion ){
@@ -769,6 +771,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 					max_walk = c.p ;
 				}
 			case 2: 
+				cout << "hola23" << endl;
 				c = mapa_aux.at((current_state.p_virtual.fil+i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam);
 				c.valoracion -= 2*CBateria(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).valor,current_state.condiciones.at(2),current_state.condiciones.at(3),true, false);
 				if(val_run < c.valoracion){
