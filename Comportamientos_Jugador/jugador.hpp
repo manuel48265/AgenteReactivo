@@ -209,6 +209,10 @@ class ComportamientoJugador : public Comportamiento{
         }
         mapa_aux.push_back(v);
       }
+
+      cout << current_state.p_virtual.col  << endl;
+      cout << current_state.p_virtual.col  << endl;
+      cout << current_state.p_virtual.col  << endl;
     }
 
     ComportamientoJugador(const ComportamientoJugador & comport) : Comportamiento(comport){}
