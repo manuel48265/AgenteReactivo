@@ -736,6 +736,8 @@ Action ComportamientoJugador::think(Sensores sensores){
 		ActulizarMapa(mapa_aux,mapaResultado,current_state);
 	}
 
+	cout << current_state.p_virtual.col  << endl;
+
 	//Toma de decisiones
 	point max_run,max_walk,max_idle;
 	int val_run, val_walk,val_idle;
