@@ -7,62 +7,51 @@
 
 using namespace std;
 
+int CBateria(unsigned char v, bool zapatillas, bool bikini, bool correr, bool girar);
+int ValCasilla(unsigned char v, bool zapatillas, bool bikini);
+
 struct point{
 	int fil;
 	int col;
-
-  
 
 	point(int i,int j){
 		fil = i;
 		col = j;
 	}
+
   point(){
     point(0,0);
   }
+
   void copy(const point &p){
     if(this != &p){
       point(p.fil,p.col);
     }
-    
   }
+
   point(const point &p){
     copy(p);
   }
-  int dis(point &a){
-    return(max(abs(this->fil - a.fil),abs(this->col - a.col)));
+
+  int dis(point &a, int tam){
+    return(max(abs((this->fil - a.fil + tam)%tam),abs((this->col - a.col + tam)%tam));
   }
+
   bool operator ==(point &p);
 	bool operator !=(point &p);
   point& operator =(const point &p);
-  bool operator<(point &p);
+  bool operator<(const point &p)const ;
 
 };
 
-bool point::operator<(point &p) const {
-  if(this->fil < p.fil){
-    return true;
-  }else if (this->fil ==  p.fil){
-    return this->col < p.col;
-  }else{
-    return false;
-  }
-}
-bool point::operator ==(point &p){
-  return (fil == p.fil) and (col == p.col);
-}
-bool point::operator !=(point &p){
-  return !(*this==p);
-}
-point& point::operator =(const point &p){
-  copy(p);
-  return *this;
-}
-
-
 struct state{
-    point p;
-    Orientacion brujula;
+    point p_real;
+    Orientacion brujula_real;
+    point p_virtual;
+    Orientacion brujula_virtual;
+    point target;
+    vector<bool> condiciones;
+
 };
 
 struct rutina{
@@ -76,51 +65,44 @@ struct rutina{
   bool operator<(const rutina  &otro) const;
 };
 
-bool rutina::operator<(const rutina  &otro) const {
-  return prioridad < otro.prioridad;
-}
+
 
 struct casilla
 {
   point p;
   unsigned char valor;
-  int camino; 
   int valoracion;
-  casilla* next;
+  int generado;
+  casilla* padre;
 
   casilla(int x, int y){
     p = point(x,y);
     valor = '?';
-    camino = -1;
     valoracion = -1;
-    next = nullptr;
+    padre = nullptr;
     
   }
   casilla(const point &q){
     p = q;
     valor = '?';
-    camino = -1;
     valoracion = -1;
-    next = nullptr;
+    padre = nullptr;
     
   }
 
   void init(int x, int y){
     p = point(x,y);
     valor = '?';
-    camino = 1000000;
     valoracion = -1;
-    next = nullptr;
+    padre = nullptr;
     
   }
 
   void mValor(unsigned char valor){
     this->valor = valor;
   }
-  void mCamino(int i){
-    camino = i;
-  }
   bool operator< (const casilla& otro)const;
+  bool comparaPunteros (const casilla*& uno, const casilla*& otro);
   /*
   bool operator< (const casilla& otro) const{
     if (desarrollar == true){
@@ -139,21 +121,55 @@ struct casilla
     
   } 
   */
-  void setNext(casilla a){
-    next = &a;
+  void setPadre(casilla a){
+    padre = &a;
   }
   int dis(casilla a){
     return p.dis(a.p);
   }
-  void CalculaValoracion (casilla a){
-    valoracion = dis(a);
+  /*
+  Condiciones:
+    0. Nos indica si el usuario está ubicado
+      Da prioridad a buscar una casilla tipo 'G'
+    1. Nos indica si tenemos o no las zapatillas
+      Da prioridad a la búsqueda de una casilla 'D'
+      Modifica la toma de decisiones, pues correr puede gastar menos batería.
+    2. Nos indica si tenemos o no el Bikini 
+      Da prioridad a la búsqueda de una casilla 'K'
+      Modifica la toma de decisiones, pues correr puede gastar menos batería.
+    3.Batería un bool que nos indica si queda batería (susceptible de ser cambiado)
+      Perder por culpa de la batería puede ser un gran problema.
+      Tomará acciones más conservadoras para evitar gastar batería.
+  */
+  
+  
+  void CalculaValoracion (const state &st,const vector<vector<casillas>> &matriz){
+    int intervalo = -4;
+    int sum = 0;
+    int tam = matriz.size();
+
+    if(matriz.at(st.p_virtual).at(st.p_virtual) == 'M' or matriz.at(st.p_virtual).at(st.p_virtual) == 'P'){
+      sum = -5000;
+    }else{
+      for(int i = -intervalo; i <= intervalo; i++){
+        for (int j = -intervalo; j <= intervalo; j++){
+          if(matriz.at(st.p_virtual +i).at(st.p_virtual+j) == '?'){
+            
+            double val = ValCasilla(matriz.at((st.p_virtual.fil + i + tam)%tam).at((st.p_virtual.col + j + tam)%tam),st.condiciones);
+
+            if (val > 0){
+              sum += val*pow((point((st.p_virtual.fil + i + tam)%tam,(st.p_virtual.col + j + tam)%tam).dis(st.target)),2);
+            }else{
+              sum += val/pow((point((st.p_virtual.fil + i + tam)%tam,(st.p_virtual.col + j + tam)%tam).dis(st.target)),2);
+            }
+          }
+        }
+      }
+    }
+    valoracion = sum;
   }
 
 };
-
-bool casilla::operator< (const casilla& otro)const{
-  return (this->p < otro.p);
-}
 
 
 
@@ -165,12 +181,16 @@ class ComportamientoJugador : public Comportamiento{
       // Constructor de la clase
       // Dar el valor inicial a las variables de estado
 
-      current_state.p = point(0,0);
-      current_state.brujula = norte;
+      current_state.p_virtual = point(0,0);
+      current_state.brujula_virtual = norte;
+      current_state.p_real = point(0,0);
+      current_state.brujula_real = norte;
+      current_state.target = point(5,5);
+      for(int i = 0; i <= 4; i++){
+        current_state.condiciones.at(i) = false; 
+      }
+
       last_action = actIDLE;
-      bien_situado = true;
-      contador = 0;
-      algoritmo = 0;
       RellenarBorde(mapaResultado);
       for(int i = 0; i < mapaResultado.size(); i++){
         vector<casilla> v; 
@@ -198,11 +218,7 @@ class ComportamientoJugador : public Comportamiento{
   private:
       state current_state;
       Action last_action;
-      bool bien_situado;
-      bool derecha;
-      unsigned int algoritmo;
       vector<vector<casilla>> mapa_aux; 
-      unsigned int contador;
       priority_queue<rutina> prioridad;
       
 };
