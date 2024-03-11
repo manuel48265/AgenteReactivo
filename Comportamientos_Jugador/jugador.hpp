@@ -190,10 +190,12 @@ class ComportamientoJugador : public Comportamiento{
     ComportamientoJugador(unsigned int size) : Comportamiento(size){
       // Constructor de la clase
       // Dar el valor inicial a las variables de estado
-
-      current_state.p_virtual = point(0,0);
+      point p;
+      p.fil = 0;
+      p.col = 0;
+      current_state.p_virtual = p;
       current_state.brujula_virtual = norte;
-      current_state.p_real = point(0,0);
+      current_state.p_real = p;
       current_state.brujula_real = norte;
       current_state.target = point(5,5);
       for(int i = 0; i < 4; i++){
