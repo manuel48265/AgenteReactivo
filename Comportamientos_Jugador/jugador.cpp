@@ -744,9 +744,12 @@ Action ComportamientoJugador::think(Sensores sensores){
 	for(int i = -2; i <= 2 ;i++){
 		for(int j = -2; j<= 2; j++){
 			cout << (current_state.p_virtual.fil + i + tam)%tam << endl;
+			cout << current_state.p_virtual.col + j << endl; 
+			cout << current_state.p_virtual.col + j + tam << endl;
 			cout << (current_state.p_virtual.col + j + tam)%tam << endl;
+
 			cout << mapa_aux.at((current_state.p_virtual.fil + i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam).valor << endl;
-			mapa_aux.at((current_state.p_virtual.fil+i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam).CalculaValoracion(current_state,mapa_aux);
+			mapa_aux.at((current_state.p_virtual.fil + i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam).CalculaValoracion(current_state,mapa_aux);
 		}
 
 	}
