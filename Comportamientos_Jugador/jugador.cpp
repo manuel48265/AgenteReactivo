@@ -720,6 +720,10 @@ Action ComportamientoJugador::think(Sensores sensores){
 	if (sensores.bateria < 1000){
 		current_state.condiciones.at(3) = true;
 	}
+	if (sensores.bateria > 3000){
+		current_state.condiciones.at(3) = false;
+	}
+
 
 	if(current_state.p_virtual == current_state.target){
 		current_state.target = point(rand()%100,rand()%100);
@@ -743,9 +747,15 @@ Action ComportamientoJugador::think(Sensores sensores){
 	cout << "hola1" << endl; 
 	for(int i = -2; i <= 2 ;i++){
 		for(int j = -2; j<= 2; j++){
+
 			cout << (current_state.p_virtual.fil + i + tam)%tam << endl;
-			cout << current_state.p_virtual.col + j << endl; 
-			cout << current_state.p_virtual.col + j + tam << endl;
+
+			cout << valores: << endl; 
+
+			cout << current_state.p_virtual.col  << endl; 
+			cout << j  << endl;
+			cout << tam << endl;
+
 			cout << (current_state.p_virtual.col + j + tam)%tam << endl;
 
 			cout << mapa_aux.at((current_state.p_virtual.fil + i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam).valor << endl;
