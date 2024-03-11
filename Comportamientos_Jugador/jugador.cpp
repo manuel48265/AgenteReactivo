@@ -742,7 +742,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 	max_run = max_walk = max_idle  = current_state.p_real;
 	cout << "hola1" << endl; 
 	for(int i = -2; i <= 2 ;i++){
-		for(int j = -2; j<= 2; i++){
+		for(int j = -2; j<= 2; j++){
 			cout << (current_state.p_virtual.fil+i + tam)%tam << endl;
 			cout << mapa_aux.at((current_state.p_virtual.fil+i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam).valor << endl;
 			mapa_aux.at((current_state.p_virtual.fil+i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam).CalculaValoracion(current_state,mapa_aux);
@@ -752,7 +752,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 	cout << "hola2" << endl;
 	casilla c;
 	for(int i = -2; i <= 2 ;i++){
-		for(int j = -2; j<= 2; i++){
+		for(int j = -2; j<= 2; j++){
 			switch (current_state.p_virtual.dis(point((current_state.p_virtual.fil+i + tam)%tam,(current_state.p_virtual.col+j + tam)%tam),tam))
 			{
 			case 0:
