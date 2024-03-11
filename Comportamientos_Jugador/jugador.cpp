@@ -750,7 +750,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 			cout << (current_state.p_virtual.fil + i + tam)%tam << endl;
 
-			cout << valores: << endl; 
+			cout << "valores:" << endl; 
 
 			cout << current_state.p_virtual.col  << endl; 
 			cout << j  << endl;
@@ -773,7 +773,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 			case 0:
 				cout << "hola21" << endl;
 				c = mapa_aux.at((current_state.p_virtual.fil+i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam);
-				val_idle = c.valoracion - 200;
+				val_idle = c.valoracion - 300;
 				max_idle = c.p ;
 			break;
 			case 1:
@@ -801,6 +801,8 @@ Action ComportamientoJugador::think(Sensores sensores){
 			
 		}
 	}
+
+	cout << val_idle << "," << val_walk << "," << val_run << endl;
 	cout << "hola3" << endl;
 
 	if(val_idle > val_walk){
@@ -810,6 +812,8 @@ Action ComportamientoJugador::think(Sensores sensores){
 			Action act = CambiaDir(current_state.brujula_virtual, CalOrientacion(current_state.p_virtual,max_run,mapa_aux.size()));
 			if( act == actIDLE) {
 				accion = actRUN;
+			}else{
+				accion = act;
 			}
 		}
 	}else{
@@ -817,11 +821,15 @@ Action ComportamientoJugador::think(Sensores sensores){
 			Action act = CambiaDir(current_state.brujula_virtual, CalOrientacion(current_state.p_virtual,max_walk,mapa_aux.size()));
 			if( act == actIDLE) {
 				accion = actWALK;
+			}else{
+				accion = act;
 			}
 		}else{
 			Action act = CambiaDir(current_state.brujula_virtual, CalOrientacion(current_state.p_virtual,max_run,mapa_aux.size()));
 			if( act == actIDLE) {
 				accion = actRUN;
+			}else{
+				accion = act;
 			}
 		}
 	}
