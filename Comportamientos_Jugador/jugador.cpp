@@ -772,7 +772,8 @@ Action ComportamientoJugador::think(Sensores sensores){
 				}
 			case 2: 
 				cout << "hola23" << endl;
-				c = mapa_aux.at((current_state.p_virtual.fil+i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam);
+				cout << (current_state.p_virtual.fil + i + tam)%tam << endl;
+				c = mapa_aux.at((current_state.p_virtual.fil + i + tam)%tam).at((current_state.p_virtual.col + j + tam)%tam);
 				c.valoracion -= 2*CBateria(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).valor,current_state.condiciones.at(2),current_state.condiciones.at(3),true, false);
 				if(val_run < c.valoracion){
 					val_run = c.valoracion;
