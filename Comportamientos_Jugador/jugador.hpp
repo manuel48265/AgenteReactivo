@@ -212,6 +212,8 @@ class ComportamientoJugador : public Comportamiento{
         mapa_aux.push_back(v);
       }
 
+      current_state.p_virtual.col = 0;
+
       cout << current_state.p_virtual.col  << endl;
       cout << current_state.p_virtual.col  << endl;
       cout << current_state.p_virtual.col  << endl;
