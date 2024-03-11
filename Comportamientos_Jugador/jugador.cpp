@@ -743,7 +743,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 	cout << "hola1" << endl; 
 	for(int i = -2; i <= 2 ;i++){
 		for(int j = -2; j<= 2; j++){
-			cout << (current_state.p_virtual.fil+i + tam)%tam << endl;
+			cout << (current_state.p_virtual.fil + i + tam)%tam << endl;
 			cout << mapa_aux.at((current_state.p_virtual.fil+i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam).valor << endl;
 			mapa_aux.at((current_state.p_virtual.fil+i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam).CalculaValoracion(current_state,mapa_aux);
 		}
@@ -753,6 +753,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 	casilla c;
 	for(int i = -2; i <= 2 ;i++){
 		for(int j = -2; j<= 2; j++){
+			cout << (current_state.p_virtual.fil + i + tam)%tam << endl;
 			switch (current_state.p_virtual.dis(point((current_state.p_virtual.fil+i + tam)%tam,(current_state.p_virtual.col+j + tam)%tam),tam))
 			{
 			case 0:
