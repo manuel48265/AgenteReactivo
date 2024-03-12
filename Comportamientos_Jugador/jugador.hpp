@@ -16,8 +16,8 @@ struct point{
 	int col;
 
 	point(int i,int j){
-		fil = i;
-		col = j;
+		this->fil = i;
+		this->col = j;
 	}
 
   point(){
@@ -52,6 +52,7 @@ struct state{
     Orientacion brujula_virtual;
     point target;
     vector<bool> condiciones;
+    int tam; 
 
 };
 
@@ -156,8 +157,6 @@ struct casilla
     int sum = 0;
     int tam = matriz.size();
 
-    cout << "hola4" << endl;
-
     if(matriz.at((st.p_virtual.fil + tam)%tam).at((st.p_virtual.col + tam)%tam).valor == 'M' or matriz.at((st.p_virtual.fil + tam)%tam).at((st.p_virtual.col + tam)%tam).valor == 'P'){
       sum = -5000;
     }else{
@@ -190,9 +189,7 @@ class ComportamientoJugador : public Comportamiento{
     ComportamientoJugador(unsigned int size) : Comportamiento(size){
       // Constructor de la clase
       // Dar el valor inicial a las variables de estado
-      point p;
-      p.fil = 0;
-      p.col = 0;
+      point p = point(0,0);
       current_state.p_virtual = p;
       current_state.brujula_virtual = norte;
       current_state.p_real = p;
@@ -211,12 +208,8 @@ class ComportamientoJugador : public Comportamiento{
         }
         mapa_aux.push_back(v);
       }
-
-      current_state.p_virtual.col = 0;
-
-      cout << current_state.p_virtual.col  << endl;
-      cout << current_state.p_virtual.col  << endl;
-      cout << current_state.p_virtual.col  << endl;
+      last_action = actIDLE;
+      current_state.tam = mapaResultado.size();
     }
 
     ComportamientoJugador(const ComportamientoJugador & comport) : Comportamiento(comport){}
@@ -231,7 +224,6 @@ class ComportamientoJugador : public Comportamiento{
         matriz.at(i).at(j) = matriz.at(j).at(i) = matriz.at(matriz.size() -1 - j).at(i) = matriz.at(i).at(matriz.size() -1 - j) ='P';
       }
     }
-    cout << "llega" << endl;
 }
 
   private:

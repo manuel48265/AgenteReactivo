@@ -181,7 +181,10 @@ bool point::operator !=(point &p){
   return !(*this==p);
 }
 point& point::operator =(const point &p){
-  copy(p);
+  if(this!=&p){ 
+        this->fil = p.fil;
+		this->col = p.col;
+    }
   return *this;
 }
 
@@ -199,7 +202,6 @@ bool casilla::comparaPunteros (const casilla*& uno, const casilla*& otro){
 }
 
 int Ajuste(int i, int adjust){
-	cout << "aqui7" << endl;
 	if(i >= 0 and i <= adjust){
 		return i;
 	}else if(i > adjust){
@@ -243,8 +245,7 @@ void CalculoCasilla(int i,const state &st, const vector<vector<unsigned char>> &
 
 */
 
-void Actualizar(int &x,int &y, const Orientacion &brujula){
-	cout << "aqui5" << endl;
+void Actualizar(int &x,int &y, const Orientacion &brujula, int tam){
 	switch (brujula)
 		{
 		case norte:
@@ -279,14 +280,12 @@ void Actualizar(int &x,int &y, const Orientacion &brujula){
 			break;
 		}
 
+		x = (x + 3*tam)%tam;
+		y = (y + 3*tam)%tam; 
+
 }
 
 Action CambiaDir(int init, int there){
-	cout << "aqui4" << endl;
-
-	cout << init << endl;
-	cout << there << endl;
-
 	if(init == there){
 		return actIDLE;
 	}
@@ -328,14 +327,9 @@ point ExploracionLocal(const state &st, const vector<vector<unsigned char>> &mat
 
 
 Orientacion CalOrientacion(point a, point b, int tam){
-	cout << "aqui2" << endl;
 	int x = (b.col - a.col + tam/2)%tam;
 	int y = (b.fil - a.fil + tam/2)%tam;
 	Orientacion tmp;
-
-	cout << "valorx" << x << endl;
-	cout << "valory" << y << endl;
-
 
 	if(y = 0){
 		if (x > 0){
@@ -410,7 +404,6 @@ Orientacion CalOrientacion(point a, point b, int tam){
 }
 
 point MasVacio(const vector<vector<unsigned char>> &matriz){
-	cout << "aqui" << endl;
 	int i_max=0;
 	int j_max=0;
 	int max_j_counter = 0;
@@ -489,7 +482,6 @@ void RutinaExploracion(const vector<unsigned char> & terreno, Action &accion, un
 */
 
 void RutinaBasica(const vector<unsigned char> & terreno, Action &accion, unsigned int &algoritmo){
-	cout << "aqui11" << endl;
 	if((terreno[2] == 'T' or terreno[2] =='S' or terreno[2] == 'G' or terreno[2] == 'B' )){
 			accion = actWALK;
 			algoritmo = 0;
@@ -689,7 +681,9 @@ Action ComportamientoJugador::think(Sensores sensores){
 	switch (last_action)
 	{
 	case actWALK:
-		Actualizar(current_state.p_virtual.fil,current_state.p_virtual.col,current_state.brujula_virtual);
+		Actualizar(current_state.p_virtual.fil,current_state.p_virtual.col,current_state.brujula_virtual,current_state.tam);
+		cout << current_state.p_virtual.fil << endl;
+		cout << current_state.p_virtual.col << endl;
 			break;
 	case actRUN:
 
@@ -736,67 +730,79 @@ Action ComportamientoJugador::think(Sensores sensores){
 		ActulizarMapa(mapa_aux,mapaResultado,current_state);
 	}
 
-	cout << current_state.p_virtual.col  << endl;
-
 	//Toma de decisiones
 	point max_run,max_walk,max_idle;
 	int val_run, val_walk,val_idle;
 	int tam = mapaResultado.size();
 
-	cout << tam << endl;
+	val_run = -40000;
 
-	max_run = max_walk = max_idle  = current_state.p_real;
-	cout << "hola1" << endl; 
+	point p1,p2,p3,p4,p5; 
+
+	p1 = point(0,0);
+
+	cout << p1.fil << "," << p1.col << endl; 
+
+	p2 = point(20,20);
+
+	cout << p2.fil << "," << p2.col << endl; 
+
+	p1 = p2; 
+
+
+	cout << p1.fil << "," << p1.col << endl; 
+
+	
+
+
+	max_run = max_walk = max_idle  = current_state.p_virtual;
 	for(int i = -2; i <= 2 ;i++){
 		for(int j = -2; j<= 2; j++){
-
-			cout << (current_state.p_virtual.fil + i + tam)%tam << endl;
-
-			cout << "valores:" << endl; 
-
-			cout << current_state.p_virtual.col  << endl; 
-			cout << j  << endl;
-			cout << tam << endl;
-
-			cout << (current_state.p_virtual.col + j + tam)%tam << endl;
-
-			cout << mapa_aux.at((current_state.p_virtual.fil + i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam).valor << endl;
-			mapa_aux.at((current_state.p_virtual.fil + i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam).CalculaValoracion(current_state,mapa_aux);
+			mapa_aux.at((current_state.p_virtual.fil + (i + 3*tam))%tam).at((current_state.p_virtual.col+ (j + 3*tam))%tam).CalculaValoracion(current_state,mapa_aux);
 		}
 
 	}
-	cout << "hola2" << endl;
+	cout << "aqui2" << endl;
 	casilla c;
-	for(int i = -2; i <= 2 ;i++){
-		for(int j = -2; j<= 2; j++){
-			cout << (current_state.p_virtual.fil + i + tam)%tam << endl;
-			switch (current_state.p_virtual.dis(point((current_state.p_virtual.fil+i + tam)%tam,(current_state.p_virtual.col+j + tam)%tam),tam))
+	for(int i = -1; i <= 1 ;i++){
+		for(int j = -1; j<= 1; j++){
+
+			cout << current_state.p_virtual.fil << endl;
+			cout << current_state.p_virtual.col << endl;
+			cout << i << endl; 
+			cout << j << endl; 
+			cout << tam << endl;
+			cout << "mirar:" << (current_state.p_virtual.fil + (i + tam))%tam << endl; 
+			cout << "mirar:" << (current_state.p_virtual.col+ (j + tam))%tam << endl; 
+
+			switch (current_state.p_virtual.dis(point((current_state.p_virtual.fil + (i + 3*tam))%tam,(current_state.p_virtual.col+ (j + 3*tam))%tam),tam))
 			{
 			case 0:
-				cout << "hola21" << endl;
-				c = mapa_aux.at((current_state.p_virtual.fil+i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam);
+				cout << "hola1" << endl;
+				c = mapa_aux.at((current_state.p_virtual.fil+ (i + 3*tam))%tam).at((current_state.p_virtual.col+ (j + 3*tam))%tam);
 				val_idle = c.valoracion - 300;
 				max_idle = c.p ;
 			break;
 			case 1:
-				cout << "hola22" << endl;
-				c = mapa_aux.at((current_state.p_virtual.fil+i + tam)%tam).at((current_state.p_virtual.col+j + tam)%tam);
-				c.valoracion -= 2*CBateria(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).valor,current_state.condiciones.at(2),current_state.condiciones.at(3),false, false);
+				cout << "hola1" << endl;
+				c = mapa_aux.at((current_state.p_virtual.fil+ (i + 3*tam))%tam).at((current_state.p_virtual.col+ (j + 3*tam))%tam);
+				c.valoracion -= 2*CBateria(mapa_aux.at((current_state.p_virtual.fil+ 3*tam )%tam).at((current_state.p_virtual.col + 3*tam)%tam).valor,current_state.condiciones.at(2),current_state.condiciones.at(3),false, false);
 				if(val_walk < c.valoracion ){
 					val_walk = c.valoracion;
 					max_walk = c.p ;
 				}
+			/*
 			case 2: 
-				cout << "hola23" << endl;
-				cout << (current_state.p_virtual.fil + i + tam)%tam << endl;
-				c = mapa_aux.at((current_state.p_virtual.fil + i + tam)%tam).at((current_state.p_virtual.col + j + tam)%tam);
+				c = mapa_aux.at((current_state.p_virtual.fil + (i + tam))%tam).at((current_state.p_virtual.col + (j + tam))%tam);
 				c.valoracion -= 2*CBateria(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).valor,current_state.condiciones.at(2),current_state.condiciones.at(3),true, false);
+				
 				if(val_run < c.valoracion){
 					val_run = c.valoracion;
 					max_run = c.p ;
 				}
 
 			break;
+			*/
 			default:
 			break;
 			}
@@ -804,9 +810,11 @@ Action ComportamientoJugador::think(Sensores sensores){
 		}
 	}
 
+	cout << current_state.p_virtual.fil << "," << current_state.p_virtual.col << endl; 
+	cout << max_walk.fil << "," << max_walk.col << endl;
+	cout << "Importante: " << current_state.brujula_virtual << endl;
 	cout << val_idle << "," << val_walk << "," << val_run << endl;
-	cout << "hola3" << endl;
-
+	
 	if(val_idle > val_walk){
 		if(val_idle > val_run){
 			accion = actIDLE;
@@ -821,6 +829,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 	}else{
 		if(val_walk > val_run){
 			Action act = CambiaDir(current_state.brujula_virtual, CalOrientacion(current_state.p_virtual,max_walk,mapa_aux.size()));
+			cout << act << endl; 
 			if( act == actIDLE) {
 				accion = actWALK;
 			}else{
@@ -835,10 +844,9 @@ Action ComportamientoJugador::think(Sensores sensores){
 			}
 		}
 	}
-	cout << "hola4" << endl;
+
+	last_action = accion;
 	
-
-
 	return accion;
 };
 
