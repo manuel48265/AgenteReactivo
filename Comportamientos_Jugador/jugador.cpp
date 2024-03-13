@@ -457,7 +457,7 @@ Orientacion CalOrientacion(point a, point b, int tam){
 
 }
 
-point MasVacio(const vector<vector<unsigned char>> &matriz){
+point MasVacio(const vector<vector<casilla>> &matriz){
 	int i_max=0;
 	int j_max=0;
 	int max_j_counter = 0;
@@ -468,9 +468,9 @@ point MasVacio(const vector<vector<unsigned char>> &matriz){
 		j_vector.push_back(0);
 		i_vector.push_back(0);
 	}
-	for(int i = 3; i< matriz.size()-3; i++){
-		for(int j=3; j<matriz.size()-3; j++){
-			if (matriz.at(i).at(j) == '?'){
+	for(int i = 0; i< matriz.size(); i++){
+		for(int j=0; j<matriz.size(); j++){
+			if (matriz.at(i).at(j).valor == '?'){
 				j_vector.at(j)++;
 				i_vector.at(i)++;
 			}
@@ -639,14 +639,14 @@ void PonerTerrenoEnMatriz(const vector<unsigned char> & terreno, state &st, vect
                 matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor = terreno.at(j*(j+1)+i);
 				
 
-				if(matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor == 'G' and current_state.condiciones.at(0) == false){
-					current_state.target = point((st.p_virtual.fil + 3*tam +i*y +j*x)%tam,(st.p_virtual.col +3*tam + -i*x +j*y)%tam);
-				}else if(matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor == 'D' and current_state.condiciones.at(1) == false){
-					current_state.target = point((st.p_virtual.fil + 3*tam +i*y +j*x)%tam,(st.p_virtual.col +3*tam + -i*x +j*y)%tam);
-				}else if(matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor == 'K' and current_state.condiciones.at(2) == false){
-					current_state.target = point((st.p_virtual.fil + 3*tam +i*y +j*x)%tam,(st.p_virtual.col +3*tam + -i*x +j*y)%tam);
-				}else if(matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor == 'X' and current_state.condiciones.at(3) == false){
-					current_state.target = point((st.p_virtual.fil + 3*tam +i*y +j*x)%tam,(st.p_virtual.col +3*tam + -i*x +j*y)%tam);
+				if(matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor == 'G' and st.condiciones.at(0) == false){
+					st.target = point((st.p_virtual.fil + 3*tam +i*y +j*x)%tam,(st.p_virtual.col +3*tam + -i*x +j*y)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor == 'D' and st.condiciones.at(1) == false){
+					st.target = point((st.p_virtual.fil + 3*tam +i*y +j*x)%tam,(st.p_virtual.col +3*tam + -i*x +j*y)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor == 'K' and st.condiciones.at(2) == false){
+					st.target = point((st.p_virtual.fil + 3*tam +i*y +j*x)%tam,(st.p_virtual.col +3*tam + -i*x +j*y)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor == 'X' and st.condiciones.at(3) == false){
+					st.target = point((st.p_virtual.fil + 3*tam +i*y +j*x)%tam,(st.p_virtual.col +3*tam + -i*x +j*y)%tam);
 				}
 
 				if(matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor == 'P'){
@@ -666,14 +666,14 @@ void PonerTerrenoEnMatriz(const vector<unsigned char> & terreno, state &st, vect
 
                 matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor = terreno.at(j*(j+1)+i*(-1)*x*y);
 
-				if(matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor == 'G' and current_state.condiciones.at(0) == false){
-					current_state.target = point((st.p_virtual.fil + 3*tam +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
-				}else if(matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor == 'D' and current_state.condiciones.at(1) == false){
-					current_state.target = point((st.p_virtual.fil + 3*tam +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
-				}else if(matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor == 'K' and current_state.condiciones.at(2) == false){
-					current_state.target = point((st.p_virtual.fil + 3*tam +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
-				}else if(matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor == 'X' and current_state.condiciones.at(3) == false){
-					current_state.target = point((st.p_virtual.fil + 3*tam +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
+				if(matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor == 'G' and st.condiciones.at(0) == false){
+					st.target = point((st.p_virtual.fil + 3*tam +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor == 'D' and st.condiciones.at(1) == false){
+					st.target = point((st.p_virtual.fil + 3*tam +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor == 'K' and st.condiciones.at(2) == false){
+					st.target = point((st.p_virtual.fil + 3*tam +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor == 'X' and st.condiciones.at(3) == false){
+					st.target = point((st.p_virtual.fil + 3*tam +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
 				}
 
 				if(matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor == 'P'){
@@ -686,14 +686,14 @@ void PonerTerrenoEnMatriz(const vector<unsigned char> & terreno, state &st, vect
                 
 				matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor = terreno.at(j*(j+1)+i*(-1)*x*y);
 
-				if(matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor == 'G' and current_state.condiciones.at(0) == false){
-					current_state.target = point((st.p_virtual.fil + 3*tam -i*x +j*x)%tam,(st.p_virtual.fil + 3*tam -i*x +j*x)%tam);
-				}else if(matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor == 'D' and current_state.condiciones.at(1) == false){
-					current_state.target = point((st.p_virtual.fil + 3*tam -i*x +j*x)%tam,(st.p_virtual.fil + 3*tam -i*x +j*x)%tam);
-				}else if(matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor == 'K' and current_state.condiciones.at(2) == false){
-					current_state.target = point((st.p_virtual.fil + 3*tam -i*x +j*x)%tam,(st.p_virtual.fil + 3*tam -i*x +j*x)%tam);
-				}else if(matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor == 'X' and current_state.condiciones.at(3) == false){
-					current_state.target = point((st.p_virtual.fil + 3*tam -i*x +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
+				if(matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor == 'G' and st.condiciones.at(0) == false){
+					st.target = point((st.p_virtual.fil + 3*tam -i*x +j*x)%tam,(st.p_virtual.fil + 3*tam -i*x +j*x)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor == 'D' and st.condiciones.at(1) == false){
+					st.target = point((st.p_virtual.fil + 3*tam -i*x +j*x)%tam,(st.p_virtual.fil + 3*tam -i*x +j*x)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor == 'K' and st.condiciones.at(2) == false){
+					st.target = point((st.p_virtual.fil + 3*tam -i*x +j*x)%tam,(st.p_virtual.fil + 3*tam -i*x +j*x)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor == 'X' and st.condiciones.at(3) == false){
+					st.target = point((st.p_virtual.fil + 3*tam -i*x +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
 				}
 
 				if(matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor == 'P'){
