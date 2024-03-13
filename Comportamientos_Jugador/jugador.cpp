@@ -921,8 +921,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	
 
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-	bool entra = true; 
+	//std::this_thread::sleep_for(std::chrono::seconds(1)); 
 	
 
 	
@@ -943,7 +942,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 			cout << current_state.p_virtual.to_s() << endl; 
 			cout << max_walk.to_s() << endl; 
-			std::this_thread::sleep_for(std::chrono::seconds(1));
+			//std::this_thread::sleep_for(std::chrono::seconds(1));
 
 			if( act == actIDLE) {
 				
