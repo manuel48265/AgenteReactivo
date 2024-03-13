@@ -70,6 +70,7 @@ struct state{
     point target;
     vector<bool> condiciones;
     int tam; 
+    int suma;
 
 };
 
@@ -193,27 +194,18 @@ class ComportamientoJugador : public Comportamiento{
       last_action = actIDLE;
       RellenarBorde(mapaResultado);
 
-      cout << casilla(3,6).p.to_s() << endl;
-
       for(int i = 0; i < mapaResultado.size(); i++){
         vector<casilla> v; 
         for (int j = 0; j < mapaResultado.size(); j++){
           casilla c = casilla(i,j) ; 
-          cout << c.p.to_s() << endl;
           v.push_back(c);
-          cout << v.at(j).p.to_s() << endl;
         }
         mapa_aux.push_back(v);
       }
 
-      for(int i = 0; i < mapaResultado.size(); i++){
-        for (int j = 0; j < mapaResultado.size(); j++){
-          cout <<mapa_aux.at(i).at(j).p.to_s() << endl; 
-        }
-      }
-
       last_action = actIDLE;
       current_state.tam = mapaResultado.size();
+      current_state.suma = 0;
     }
 
     ComportamientoJugador(const ComportamientoJugador & comport) : Comportamiento(comport){}

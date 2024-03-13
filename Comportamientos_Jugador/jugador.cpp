@@ -820,8 +820,10 @@ Action ComportamientoJugador::think(Sensores sensores){
 	}
 
 	if (pasa){
-		for( int k = -5; i <= 5; i++ ){
-			for(int s = -5; j <= 5; j++){
+		current_state.suma = 0;
+		int tam = current_state.tam;
+		for( int k = -5; k <= 5; k++ ){
+			for(int s = -5; s <= 5; s++){
 				if (mapa_aux.at((current_state.p_virtual.fil + k + 3*tam)%tam).at((current_state.p_virtual.col + s + 3*tam)%tam).valor == '?'){
 					current_state.target = point((current_state.p_virtual.fil + k + 3*tam)%tam,(current_state.p_virtual.col + s + 3*tam)%tam);
 				}		
@@ -832,7 +834,6 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).pasos++;
 
-	int suma = 0;
 	for(int i = 0; i < current_state.tam; i++){
 		for(int j = 0; j < current_state.tam; j++){
 			if(mapa_aux.at(i).at(j).valor == 'G' and current_state.condiciones.at(0) == false){
@@ -843,25 +844,26 @@ Action ComportamientoJugador::think(Sensores sensores){
 				current_state.target = point(i,j);
 			}else if(mapa_aux.at(i).at(j).valor == 'X' and current_state.condiciones.at(3) == false){
 				current_state.target = point(i,j);
-			}else if(current_state.p_virtual != current_state.target or suma == 20 ){
-				bool no_encontrado = true;
-				suma = 0;
-				int tam = current_state.tam;
+			}
 				
-				for( int k = -5; i <= 5; i++ ){
-					for(int s = -5; j <= 5; j++){
-						if (mapa_aux.at((current_state.p_virtual.fil + k + 3*tam)%tam).at((current_state.p_virtual.col + s + 3*tam)%tam).valor == '?'){
-							current_state.target = point((current_state.p_virtual.fil + k + 3*tam)%tam,(current_state.p_virtual.col + s + 3*tam)%tam);
-						}
+		}
+	}
 
-						
-					}
+	if(current_state.p_virtual != current_state.target or current_state.suma == 20 ){
+		int tam = current_state.tam;
+		
+		for( int k = -5; k <= 5; k++ ){
+			for(int s = -5; s <= 5; s++){
+				if (mapa_aux.at((current_state.p_virtual.fil + k + 3*tam)%tam).at((current_state.p_virtual.col + s + 3*tam)%tam).valor == '?'){
+					current_state.target = point((current_state.p_virtual.fil + k + 3*tam)%tam,(current_state.p_virtual.col + s + 3*tam)%tam);
 				}
+
 				
 			}
 		}
 	}
-	suma++;
+	
+	current_state.suma++;
 	
 	
 
