@@ -352,7 +352,7 @@ Orientacion CalOrientacion(point a, point b, int tam){
 	cout << x << endl; 
 
 	
-	if(y <=2){
+	if(y <=2 and y > 0){
 		if (x == 0){
 			tmp = Orientacion::sur;
 		}else if(x <= 2){
@@ -1007,6 +1007,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 			cout << mapa_aux.at(max_run.fil).at(max_run.col).valoracion << endl;
 			cout << CalOrientacion(current_state.p_virtual,max_run,mapa_aux.size()) << endl;
 			cout << current_state.brujula_virtual << endl;
+			
 			if( act == actIDLE) {
 				accion = actRUN;
 			}else{
