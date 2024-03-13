@@ -56,7 +56,7 @@ struct point{
   }
 
   bool operator ==(const point &p) const ;
-	bool operator !=(point &p);
+	bool operator !=(const point &p) const ;
   point& operator =(const point &p);
   bool operator<(const point &p)const ;
 
