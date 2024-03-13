@@ -4,6 +4,8 @@
 #include "queue"
 #include "cmath"
 #include "iostream"
+#include <chrono>
+#include <thread>
 
 
 using namespace std;
@@ -24,21 +26,36 @@ struct point{
     point(0,0);
   }
 
-  void copy(const point &p){
+
+  point(const point &p){
     if(this != &p){
-      point(p.fil,p.col);
+      this->fil = p.fil;
+      this->col = p.col;
     }
   }
 
-  point(const point &p){
-    copy(p);
-  }
-
   int dis(const point &a, int tam)const {
-    return(max(abs((this->fil - a.fil + tam)%tam),abs((this->col - a.col + tam)%tam)));
+    int x;
+    int y;
+    if(abs(this->fil - a.fil) < tam/2){
+      x = abs(this->fil - a.fil);
+    }else{
+      x = abs(this->fil - a.fil) - tam;
+    }
+
+    if(abs(this->col - a.col) < tam/2){
+      y = this->col - a.col;
+    }else{
+      y = abs(this->col - a.col) - tam;
+    }
+    return max(abs(x),abs(y));
   }
 
-  bool operator ==(point &p);
+  string to_s(){
+    return (to_string(fil) + "," + to_string(col));
+  }
+
+  bool operator ==(const point &p) const ;
 	bool operator !=(point &p);
   point& operator =(const point &p);
   bool operator<(const point &p)const ;
@@ -74,36 +91,38 @@ struct casilla
   point p;
   unsigned char valor;
   int valoracion;
-  int generado;
-  casilla* padre;
+  int pasos;
 
   casilla(){
     p = point(0,0);
     valor = '?';
     valoracion = -1;
-    padre = nullptr;
+    pasos = 0;
   }
 
   casilla(int x, int y){
     p = point(x,y);
     valor = '?';
     valoracion = -1;
-    padre = nullptr;
+    pasos = 0;
     
   }
-  casilla(const point &q){
-    p = q;
-    valor = '?';
-    valoracion = -1;
-    padre = nullptr;
-    
+  casilla(const casilla &q){
+
+    if(this != &q){
+      this->p = q.p;
+      this->valoracion = q.valoracion;
+      this->pasos = q.pasos;
+      this->valor = q.valor;
+    }
+
   }
 
   void init(int x, int y){
     p = point(x,y);
     valor = '?';
     valoracion = -1;
-    padre = nullptr;
+    pasos = 0;
     
   }
 
@@ -112,6 +131,7 @@ struct casilla
   }
   bool operator< (const casilla& otro)const;
   bool comparaPunteros (const casilla*& uno, const casilla*& otro);
+  casilla& operator= (const casilla& otro);
   /*
   bool operator< (const casilla& otro) const{
     if (desarrollar == true){
@@ -130,9 +150,6 @@ struct casilla
     
   } 
   */
-  void setPadre(casilla a){
-    padre = &a;
-  }
   int dis(casilla a,int tam){
     return p.dis(a.p,tam);
   }
@@ -151,32 +168,6 @@ struct casilla
       Tomará acciones más conservadoras para evitar gastar batería.
   */
   
-  
-  void CalculaValoracion (const state &st,const vector<vector<casilla>> &matriz){
-    int intervalo = -4;
-    int sum = 0;
-    int tam = matriz.size();
-
-    if(matriz.at((st.p_virtual.fil + tam)%tam).at((st.p_virtual.col + tam)%tam).valor == 'M' or matriz.at((st.p_virtual.fil + tam)%tam).at((st.p_virtual.col + tam)%tam).valor == 'P'){
-      sum = -5000;
-    }else{
-      for(int i = -intervalo; i <= intervalo; i++){
-        for (int j = -intervalo; j <= intervalo; j++){
-          if(matriz.at((st.p_virtual.fil + i + tam)%tam).at((st.p_virtual.col + j + tam)%tam).valor == '?'){
-            
-            double val = ValCasilla(matriz.at((st.p_virtual.fil + i + tam)%tam).at((st.p_virtual.col + j + tam)%tam).valor,st.condiciones);
-
-            if (val > 0){
-              sum += val/(point((st.p_virtual.fil + i + tam)%tam,(st.p_virtual.col + j + tam)%tam).dis(st.target,tam));
-            }else{
-              sum += val/(point((st.p_virtual.fil + i + tam)%tam,(st.p_virtual.col + j + tam)%tam).dis(st.target,tam));
-            }
-          }
-        }
-      }
-    }
-    valoracion = sum;
-  }
 
 };
 
@@ -201,13 +192,26 @@ class ComportamientoJugador : public Comportamiento{
 
       last_action = actIDLE;
       RellenarBorde(mapaResultado);
+
+      cout << casilla(3,6).p.to_s() << endl;
+
       for(int i = 0; i < mapaResultado.size(); i++){
         vector<casilla> v; 
         for (int j = 0; j < mapaResultado.size(); j++){
-          v.push_back(casilla(i,j));
+          casilla c = casilla(i,j) ; 
+          cout << c.p.to_s() << endl;
+          v.push_back(c);
+          cout << v.at(j).p.to_s() << endl;
         }
         mapa_aux.push_back(v);
       }
+
+      for(int i = 0; i < mapaResultado.size(); i++){
+        for (int j = 0; j < mapaResultado.size(); j++){
+          cout <<mapa_aux.at(i).at(j).p.to_s() << endl; 
+        }
+      }
+
       last_action = actIDLE;
       current_state.tam = mapaResultado.size();
     }
