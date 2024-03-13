@@ -22,6 +22,7 @@ casilla& casilla::operator= (const casilla& otro){
 	}
 	return(*this);
 }
+
 int CBateria(unsigned char v, bool zapatillas, bool bikini, bool correr, bool girar){
   int coste;
   switch (v)
@@ -589,7 +590,7 @@ void Explorar(point inicio,const vector<vector<casilla>> &matriz,point target,li
 
 */
 
-void PonerTerrenoEnMatriz(const vector<unsigned char> & terreno, const state &st, vector<vector<casilla>> &matriz){
+void PonerTerrenoEnMatriz(const vector<unsigned char> & terreno, state &st, vector<vector<casilla>> &matriz){
 
     int x;
     int y;
@@ -631,27 +632,84 @@ void PonerTerrenoEnMatriz(const vector<unsigned char> & terreno, const state &st
             break;
     }
 	int tam = matriz.size();
-
+	int suma = 0;
     if(st.brujula_virtual%2 == 0){
         for (int j = 0; j <= 3; j++){
             for(int i = -j; i <= j; i++){
                 matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor = terreno.at(j*(j+1)+i);
-            }
+				
+
+				if(matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor == 'G' and current_state.condiciones.at(0) == false){
+					current_state.target = point((st.p_virtual.fil + 3*tam +i*y +j*x)%tam,(st.p_virtual.col +3*tam + -i*x +j*y)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor == 'D' and current_state.condiciones.at(1) == false){
+					current_state.target = point((st.p_virtual.fil + 3*tam +i*y +j*x)%tam,(st.p_virtual.col +3*tam + -i*x +j*y)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor == 'K' and current_state.condiciones.at(2) == false){
+					current_state.target = point((st.p_virtual.fil + 3*tam +i*y +j*x)%tam,(st.p_virtual.col +3*tam + -i*x +j*y)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor == 'X' and current_state.condiciones.at(3) == false){
+					current_state.target = point((st.p_virtual.fil + 3*tam +i*y +j*x)%tam,(st.p_virtual.col +3*tam + -i*x +j*y)%tam);
+				}
+
+				if(matriz.at((st.p_virtual.fil + 3*tam +i*y +j*x)%tam).at((st.p_virtual.col +3*tam + -i*x +j*y)%tam).valor == 'P'){
+					suma++;
+				}
+				
+			}
+            
         }
     }
 
     if(st.brujula_virtual%2 == 1){
+		 
         for (int j = 0; j <= 3; j++){
 
             for(int i = -j; i < 0; i++){
+
                 matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor = terreno.at(j*(j+1)+i*(-1)*x*y);
+
+				if(matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor == 'G' and current_state.condiciones.at(0) == false){
+					current_state.target = point((st.p_virtual.fil + 3*tam +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor == 'D' and current_state.condiciones.at(1) == false){
+					current_state.target = point((st.p_virtual.fil + 3*tam +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor == 'K' and current_state.condiciones.at(2) == false){
+					current_state.target = point((st.p_virtual.fil + 3*tam +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor == 'X' and current_state.condiciones.at(3) == false){
+					current_state.target = point((st.p_virtual.fil + 3*tam +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
+				}
+
+				if(matriz.at((st.p_virtual.fil + 3*tam +j*x)%tam).at((st.p_virtual.col + 3*tam + i*y +j*y)%tam).valor == 'P'){
+					suma++;
+				}
+
             }
 
             for(int i = 0; i <= j; i++){
-                matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor = terreno.at(j*(j+1)+i*(-1)*x*y);
-            }
+                
+				matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor = terreno.at(j*(j+1)+i*(-1)*x*y);
+
+				if(matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor == 'G' and current_state.condiciones.at(0) == false){
+					current_state.target = point((st.p_virtual.fil + 3*tam -i*x +j*x)%tam,(st.p_virtual.fil + 3*tam -i*x +j*x)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor == 'D' and current_state.condiciones.at(1) == false){
+					current_state.target = point((st.p_virtual.fil + 3*tam -i*x +j*x)%tam,(st.p_virtual.fil + 3*tam -i*x +j*x)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor == 'K' and current_state.condiciones.at(2) == false){
+					current_state.target = point((st.p_virtual.fil + 3*tam -i*x +j*x)%tam,(st.p_virtual.fil + 3*tam -i*x +j*x)%tam);
+				}else if(matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor == 'X' and current_state.condiciones.at(3) == false){
+					current_state.target = point((st.p_virtual.fil + 3*tam -i*x +j*x)%tam,(st.p_virtual.col + 3*tam + i*y +j*y)%tam);
+				}
+
+				if(matriz.at((st.p_virtual.fil + 3*tam -i*x +j*x)%tam).at((st.p_virtual.col + 3*tam+j*y)%tam).valor == 'P'){
+					suma++;
+				}
+
+
+			
+			
+			}
         }
     }
+
+	if(suma >= 6){
+		st.target = MasVacio(matriz);
+	}
 
 
 }
@@ -719,10 +777,8 @@ int CalculaValoracion (const state &st,const vector<vector<casilla>> &matriz, in
 				sum += 100;
 			}
 
-			if( matriz.at(fil).at(col).p != st.target ){
-				sum += pow(141,2)/pow(st.target.dis(point(fil,col),st.tam),2);
-			}else{
-				sum += pow(141,2) + 40000;
+			if( st.target != point(-1,-1) ){
+				sum += pow(141,2)/pow(st.target.dis(point(fil,col),st.tam) + 1,2);
 			}
 			
 			
@@ -802,71 +858,29 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	//Actualizamos el punto
 
-	bool pasa = false;
 	if(sensores.terreno.at(0) == 'G'){
 		current_state.condiciones.at(0) = true;
-		pasa = true;
+
 	}else if (sensores.terreno.at(0) == 'D'){
 		current_state.condiciones.at(1) = true;
-		pasa = true;
+
 	}else if(sensores.terreno.at(0) == 'K'){
 		current_state.condiciones.at(2) = true;
-		pasa = true;
+
 	}
 	if (sensores.bateria < 1000){
 		current_state.condiciones.at(3) = true;
-		pasa = true;
+
 	}
 	if (sensores.bateria > 3000){
 		current_state.condiciones.at(3) = false;
-		pasa = true;
+
 	}
 
-	if (pasa){
-		current_state.suma = 0;
-		int tam = current_state.tam;
-		for( int k = -5; k <= 5; k++ ){
-			for(int s = -5; s <= 5; s++){
-				if (mapa_aux.at((current_state.p_virtual.fil + k + 3*tam)%tam).at((current_state.p_virtual.col + s + 3*tam)%tam).valor == '?'){
-					current_state.target = point((current_state.p_virtual.fil + k + 3*tam)%tam,(current_state.p_virtual.col + s + 3*tam)%tam);
-				}		
-			}
-		}
-		
+	if (current_state.target == current_state.p_virtual){
+		current_state.target = MasVacio(mapa_aux);
 	}
 
-	mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).pasos++;
-
-	for(int i = 0; i < current_state.tam; i++){
-		for(int j = 0; j < current_state.tam; j++){
-			if(mapa_aux.at(i).at(j).valor == 'G' and current_state.condiciones.at(0) == false){
-				current_state.target = point(i,j);
-			}else if(mapa_aux.at(i).at(j).valor == 'D' and current_state.condiciones.at(1) == false){
-				current_state.target = point(i,j);
-			}else if(mapa_aux.at(i).at(j).valor == 'K' and current_state.condiciones.at(2) == false){
-				current_state.target = point(i,j);
-			}else if(mapa_aux.at(i).at(j).valor == 'X' and current_state.condiciones.at(3) == false){
-				current_state.target = point(i,j);
-			}
-				
-		}
-	}
-
-	if(current_state.p_virtual != current_state.target or current_state.suma == 20 ){
-		int tam = current_state.tam;
-		
-		for( int k = -5; k <= 5; k++ ){
-			for(int s = -5; s <= 5; s++){
-				if (mapa_aux.at((current_state.p_virtual.fil + k + 3*tam)%tam).at((current_state.p_virtual.col + s + 3*tam)%tam).valor == '?'){
-					current_state.target = point((current_state.p_virtual.fil + k + 3*tam)%tam,(current_state.p_virtual.col + s + 3*tam)%tam);
-				}
-
-				
-			}
-		}
-	}
-	
-	current_state.suma++;
 	
 	
 
