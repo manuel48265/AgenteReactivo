@@ -799,18 +799,35 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	//Actualizamos el punto
 
+	bool pasa = false;
 	if(sensores.terreno.at(0) == 'G'){
 		current_state.condiciones.at(0) = true;
+		pasa = true;
 	}else if (sensores.terreno.at(0) == 'D'){
 		current_state.condiciones.at(1) = true;
+		pasa = true;
 	}else if(sensores.terreno.at(0) == 'K'){
 		current_state.condiciones.at(2) = true;
+		pasa = true;
 	}
 	if (sensores.bateria < 1000){
 		current_state.condiciones.at(3) = true;
+		pasa = true;
 	}
 	if (sensores.bateria > 3000){
 		current_state.condiciones.at(3) = false;
+		pasa = true;
+	}
+
+	if (pasa){
+		for( int k = -5; i <= 5; i++ ){
+			for(int s = -5; j <= 5; j++){
+				if (mapa_aux.at((current_state.p_virtual.fil + k + 3*tam)%tam).at((current_state.p_virtual.col + s + 3*tam)%tam).valor == '?'){
+					current_state.target = point((current_state.p_virtual.fil + k + 3*tam)%tam,(current_state.p_virtual.col + s + 3*tam)%tam);
+				}		
+			}
+		}
+		
 	}
 
 	mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).pasos++;
