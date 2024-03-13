@@ -920,7 +920,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 			if (i == 0 and j == 0){
 				c = mapa_aux.at((current_state.p_virtual.fil+ (i + 3*tam))%tam).at((current_state.p_virtual.col+ (j + 3*tam))%tam);
-				val_idle = c.valoracion ;
+				val_idle = c.valoracion  - 400;
 				max_idle = c.p ;
 			}else if ((abs(i) == 1) and (abs(j) == 1)){
 				c = mapa_aux.at((current_state.p_virtual.fil+ (i + 3*tam))%tam).at((current_state.p_virtual.col+ (j + 3*tam))%tam);
