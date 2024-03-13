@@ -348,6 +348,9 @@ Orientacion CalOrientacion(point a, point b, int tam){
 	int y = (b.fil + (- a.fil + 3*tam))%tam;
 	Orientacion tmp;
 
+	cout << y << endl; 
+	cout << x << endl; 
+
 	
 	if(y <=2){
 		if (x == 0){
