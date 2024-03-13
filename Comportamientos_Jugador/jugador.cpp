@@ -876,12 +876,14 @@ Action ComportamientoJugador::think(Sensores sensores){
 		ActulizarMapa(mapa_aux,mapaResultado,current_state);
 	}
 
+	/*
 	for(int i = 0; i< mapa_aux.size(); i++){
 		for(int j = 0; j < mapa_aux.size(); j++){
 			cout << mapa_aux.at(i).at(j).valor << " ";
 		}
 		cout << endl;
 	}
+	*/
 
 
 	//std::this_thread::sleep_for(std::chrono::seconds(3));
