@@ -815,7 +815,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).pasos++;
 
-
+	int suma = 0 ;
 	for(int i = 0; i < current_state.tam; i++){
 		for(int j = 0; j < current_state.tam; j++){
 			if(mapa_aux.at(i).at(j).valor == 'G' and current_state.condiciones.at(0) == false){
@@ -826,11 +826,12 @@ Action ComportamientoJugador::think(Sensores sensores){
 				current_state.target = point(i,j);
 			}else if(mapa_aux.at(i).at(j).valor == 'X' and current_state.condiciones.at(3) == false){
 				current_state.target = point(i,j);
-			}else if(current_state.p_virtual == current_state.target){
+			}else if(current_state.p_virtual == current_state.target or suma == 10){
 				current_state.target = point(rand()%current_state.tam,rand()%current_state.tam);
 			}
 		}
 	}
+	suma ++;
 	
 
 	PonerTerrenoEnMatriz(sensores.terreno,current_state,mapa_aux);
