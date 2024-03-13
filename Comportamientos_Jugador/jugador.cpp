@@ -931,10 +931,11 @@ Action ComportamientoJugador::think(Sensores sensores){
 					val_walk = c.valoracion;
 					max_walk = c.p ;
 				}
-			}else if((abs(i) == 2 and abs(j) == 0) or (abs(i) == 0 and abs(j) == 2)){
+			}else if((abs(j) != 1) and(abs(i) != 1)){
 				c = mapa_aux.at((current_state.p_virtual.fil + (i + tam))%tam).at((current_state.p_virtual.col + (j + tam))%tam);
 				c.valoracion -= 2*CBateria(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).valor,current_state.condiciones.at(2),current_state.condiciones.at(3),true, false);
 				
+				cout << c.p.to_s() << endl; 
 				if(val_run < c.valoracion){
 					val_run = c.valoracion;
 					max_run = c.p ;
