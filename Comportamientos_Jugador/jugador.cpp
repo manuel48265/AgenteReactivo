@@ -879,7 +879,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	}
 
-	std::this_thread::sleep_for(std::chrono::seconds(2)); 
+	//std::this_thread::sleep_for(std::chrono::seconds(2)); 
 	casilla c;
 	for(int i = -2; i <= 2 ;i++){
 		for(int j = -2; j<= 2; j++){
