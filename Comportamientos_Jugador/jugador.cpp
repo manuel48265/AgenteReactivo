@@ -1001,6 +1001,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 			cout << max_run.to_s() << endl; 
 			//std::this_thread::sleep_for(std::chrono::seconds(1));
 			Action act = CambiaDir(current_state.brujula_virtual, CalOrientacion(current_state.p_virtual,max_run,mapa_aux.size()));
+			cout << mapa_aux.at(max_run.fil).at(max_run.col).valoracion << endl;
 			if( act == actIDLE) {
 				accion = actRUN;
 			}else{
