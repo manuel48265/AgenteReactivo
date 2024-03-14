@@ -837,6 +837,19 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	//Actualizamos el punto
 
+	for(int i = 0; i < 16; i++){
+		if(sensores.terreno.at(0) == 'G' and current_state.condiciones.bien_ubicado = false ){
+		current_state.condiciones.bien_ubicado = true;
+
+		}else if (sensores.terreno.at(0) == 'D' and current_state.condiciones.zapatillas = false){
+			current_state.condiciones.zapatillas = true;
+
+		}else if(sensores.terreno.at(0) == 'K' and current_state.condiciones.bikini = false){
+			current_state.condiciones.bikini = true;
+
+		}
+	}
+
 	if(sensores.terreno.at(0) == 'G'){
 		current_state.condiciones.bien_ubicado = true;
 
