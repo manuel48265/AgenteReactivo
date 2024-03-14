@@ -897,7 +897,9 @@ Action ComportamientoJugador::think(Sensores sensores){
 		for(int j = -1; j<= 1; j++){
 			pair<point,int> pa = CalculaValoracion(current_state,*mapa,point((current_state.p_virtual.fil +i),(current_state.p_virtual.col + j)));
 			movimiento.push(pa);
+			cout << pa.first;
 		}
+		cout << endl;
 
 	}
 	Action act; 
