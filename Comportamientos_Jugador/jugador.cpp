@@ -895,7 +895,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 	
 	for(int i = 0; i< mapa_aux.size(); i++){
 		for(int j = 0; j < mapa_aux.size(); j++){
-			cout << (*mapa).at(i).at(j).valor << " ";
+			cout << (*mapa).at(i).at(j) << " ";
 		}
 		cout << endl;
 	}
