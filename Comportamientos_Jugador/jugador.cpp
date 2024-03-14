@@ -1095,6 +1095,8 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	*/
 
+	cout << current_state.target.to_s() << endl; 
+
 	last_action = accion;
 	
 	return accion;
