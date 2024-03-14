@@ -22,6 +22,13 @@ struct point{
 		this->col = j;
 	}
 
+  point(int i, int j, int size){
+    int tam = size;
+    this->fil = i;
+		this->col = j;
+	}
+
+
   point(){
     point(0,0);
   }
@@ -62,31 +69,50 @@ struct point{
 
 };
 
+struct necesidad{
+  bool bien_ubicado;
+  bool zapatillas; 
+  bool bikini; 
+  bool bateria;
+  bool atrapado_muros;
+  bool mucho_precipicio;
+
+  necesidad(){
+    bien_ubicado = false;
+    zapatillas = false; 
+    bikini = false; 
+    bateria = true;
+    atrapado_muros = false;
+    mucho_precipicio = false;
+  }
+
+  necesidad(const necesidad &n){
+    if( this != &n){
+      bien_ubicado = n.bien_ubicado ;
+      zapatillas = n.zapatillas; 
+      bikini = n.bikini; 
+      bateria = n.bateria;
+      atrapado_muros = n.atrapado_muros;
+      mucho_precipicio = n.mucho_precipicio;
+    }
+    
+  }
+
+};
+
 struct state{
     point p_real;
     Orientacion brujula_real;
     point p_virtual;
     Orientacion brujula_virtual;
     point target;
-    vector<bool> condiciones;
-    int tam; 
-    int suma;
+    necesidad condiciones; 
 
 };
 
-struct rutina{
-  Action accion;
-  int prioridad;
-
-  rutina(Action a, int pri){
-    accion = a;
-    prioridad = pri; 
-  }
-  bool operator<(const rutina  &otro) const;
-};
 
 
-
+/*
 struct casilla
 {
   point p;
@@ -150,7 +176,7 @@ struct casilla
     }
     
   } 
-  */
+  
   int dis(casilla a,int tam){
     return p.dis(a.p,tam);
   }
@@ -167,10 +193,12 @@ struct casilla
     3.Batería un bool que nos indica si queda batería (susceptible de ser cambiado)
       Perder por culpa de la batería puede ser un gran problema.
       Tomará acciones más conservadoras para evitar gastar batería.
-  */
+  
   
 
 };
+
+*/
 
 
 
@@ -187,25 +215,22 @@ class ComportamientoJugador : public Comportamiento{
       current_state.p_real = p;
       current_state.brujula_real = norte;
       current_state.target = point(5,5);
-      for(int i = 0; i < 4; i++){
-        current_state.condiciones.push_back(false); 
-      }
+      current_state.condiciones = necesidad();
 
       last_action = actIDLE;
       RellenarBorde(mapaResultado);
 
       for(int i = 0; i < mapaResultado.size(); i++){
-        vector<casilla> v; 
+        vector<unsigned char> v; 
         for (int j = 0; j < mapaResultado.size(); j++){
-          casilla c = casilla(i,j) ; 
+          unsigned char c = '?'; 
           v.push_back(c);
         }
         mapa_aux.push_back(v);
       }
 
       last_action = actIDLE;
-      current_state.tam = mapaResultado.size();
-      current_state.suma = 0;
+      tam = mapaResultado.size();
     }
 
     ComportamientoJugador(const ComportamientoJugador & comport) : Comportamiento(comport){}
@@ -213,6 +238,20 @@ class ComportamientoJugador : public Comportamiento{
 
     Action think(Sensores sensores);
     int interact(Action accion, int valor);
+    int CBateria(unsigned char v, bool zapatillas, bool bikini, bool correr, bool girar);
+    int ValCasilla(unsigned char v, const state &st);
+    Orientacion CalOrientacion(point a, point b);
+    void PonerTerrenoEnMatriz(const vector<unsigned char> & terreno, state &st, vector<vector<unsigned char>> &matriz);
+    void ActulizarMapa(vector<vector<unsigned char>> &mapa_virtual, vector<vector<unsigned char>> &mapa_real, const state &st);
+    pair<point,int> CalculaValoracion (const state &st,const vector<vector<unsigned char>> &matriz, const point &p);
+    void Actualizar(int &x,int &y, const Orientacion &brujula);
+    Action CambiaDir(int init, int there);
+    void Asignar(vector<vector<unsigned char>> &matriz, const point &p, unsigned char c);
+    bool Igual(const vector<vector<unsigned char>> &matriz, const point &p, unsigned char c);
+    unsigned char Dato(const vector<vector<unsigned char>> &matriz, const point &p);
+    point PuntoOrientado(const state &st,Orientacion brujula);
+    point BuscaPunto(const state &st);
+    point Seguir(const state &st);
 
     void RellenarBorde(vector<vector<unsigned char>> &matriz){
     for(int i = 0; i < matriz.size(); i++){
@@ -220,13 +259,15 @@ class ComportamientoJugador : public Comportamiento{
         matriz.at(i).at(j) = matriz.at(j).at(i) = matriz.at(matriz.size() -1 - j).at(i) = matriz.at(i).at(matriz.size() -1 - j) ='P';
       }
     }
+
 }
 
   private:
       state current_state;
       Action last_action;
-      vector<vector<casilla>> mapa_aux; 
-      priority_queue<rutina> prioridad;
+      vector<vector<unsigned char>> mapa_aux; 
+      int tam;
+
       
 };
 #endif
