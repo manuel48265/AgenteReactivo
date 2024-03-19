@@ -917,6 +917,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 	priority_queue<pair<point,int>,vector<pair<point,int>>,myComp> movimiento;
 	for(int i = -1; i <= 1 ;i++){
 		for(int j = -1; j<= 1; j++){
+			
 			pair<point,int> pa = CalculaValoracion(current_state,*mapa,point((current_state.p_virtual.fil +i),(current_state.p_virtual.col + j)));
 			movimiento.push(pa);
 			cout << pa.second << " ";
