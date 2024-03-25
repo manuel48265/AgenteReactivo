@@ -10,6 +10,8 @@
 
 using namespace std;
 
+
+
 int CBateria(unsigned char v, bool zapatillas, bool bikini, bool correr, bool girar);
 int ValCasilla(unsigned char v, const vector<bool> &condiciones);
 
@@ -75,7 +77,8 @@ struct necesidad{
   bool bikini; 
   bool bateria;
   bool atrapado_muros;
-  bool mucho_precipicio;
+  bool investiga;
+  bool salida_muros;
 
   necesidad(){
     bien_ubicado = false;
@@ -83,7 +86,8 @@ struct necesidad{
     bikini = false; 
     bateria = true;
     atrapado_muros = false;
-    mucho_precipicio = false;
+    investiga = false;
+    salida_muros = false; 
   }
 
   necesidad(const necesidad &n){
@@ -93,7 +97,7 @@ struct necesidad{
       bikini = n.bikini; 
       bateria = n.bateria;
       atrapado_muros = n.atrapado_muros;
-      mucho_precipicio = n.mucho_precipicio;
+      investiga = n.investiga;
     }
     
   }
@@ -107,6 +111,33 @@ struct state{
     Orientacion brujula_virtual;
     point target;
     necesidad condiciones; 
+    Orientacion way;
+
+    state(){
+    p_real = point(0,0);
+    brujula_real = norte;
+    p_virtual = point(0,0);
+    brujula_virtual = norte;
+    target = point(-1,-1);
+    condiciones = necesidad(); 
+    way = norte; 
+    }
+
+};
+
+struct Importantes{
+  int dis_origen;
+  int bateria; 
+  int hijos; 
+  
+
+  Importantes(){
+    dis_origen = -1;
+    bateria = -1;
+    hijos = 0;
+  }
+
+  Importantes& operator=(const Importantes &rhs );
 
 };
 
@@ -209,15 +240,10 @@ class ComportamientoJugador : public Comportamiento{
     ComportamientoJugador(unsigned int size) : Comportamiento(size){
       // Constructor de la clase
       // Dar el valor inicial a las variables de estado
-      point p = point(0,0);
-      current_state.p_virtual = p;
-      current_state.brujula_virtual = norte;
-      current_state.p_real = p;
-      current_state.brujula_real = norte;
-      current_state.target = point(5,5);
-      current_state.condiciones = necesidad();
-
+      current_state = state();
       last_action = actIDLE;
+      tam = mapaResultado.size();
+
       RellenarBorde(mapaResultado);
 
       for(int i = 0; i < mapaResultado.size(); i++){
@@ -229,8 +255,25 @@ class ComportamientoJugador : public Comportamiento{
         mapa_aux.push_back(v);
       }
 
-      last_action = actIDLE;
-      tam = mapaResultado.size();
+      for(int i = 0; i < mapaResultado.size(); i++){
+        vector<Importantes> v; 
+        for (int j = 0; j < mapaResultado.size(); j++){
+          Importantes c = Importantes();
+          c.hijos = pow((intervalo+1),2);
+          v.push_back(c);
+        }
+        mapa_recorrido.push_back(v);
+      }
+
+      mapa_recorrido.at(0).at(0).dis_origen = 0;
+
+      for(int i = 0; i < 3; i++){
+        queue<point>cola; 
+        Por_actualizar.push_back(cola);
+      }
+      
+
+
     }
 
     ComportamientoJugador(const ComportamientoJugador & comport) : Comportamiento(comport){}
@@ -238,13 +281,13 @@ class ComportamientoJugador : public Comportamiento{
 
     Action think(Sensores sensores);
     int interact(Action accion, int valor);
-    int CBateria(unsigned char v, bool zapatillas, bool bikini, bool correr, bool girar);
+    int CBateria(unsigned char v, const state &st, bool correr,bool girar);
     int ValCasilla(unsigned char v, const state &st);
     Orientacion CalOrientacion(point a, point b);
-    void PonerTerrenoEnMatriz(const vector<unsigned char> & terreno, state &st, vector<vector<unsigned char>> &matriz);
+    void PonerTerrenoEnMatriz(const vector<unsigned char> & terreno, state &st, vector<vector<unsigned char>> &matriz, bool act_cola);
     void ActulizarMapa(vector<vector<unsigned char>> &mapa_virtual, vector<vector<unsigned char>> &mapa_real, const state &st);
     pair<point,int> CalculaValoracion (const state &st,const vector<vector<unsigned char>> &matriz, const point &p);
-    void Actualizar(int &x,int &y, const Orientacion &brujula);
+    void Actualizar(int &x,int &y, const Orientacion &brujula, int k);
     Action CambiaDir(int init, int there);
     void Asignar(vector<vector<unsigned char>> &matriz, const point &p, unsigned char c);
     bool Igual(const vector<vector<unsigned char>> &matriz, const point &p, unsigned char c);
@@ -252,21 +295,79 @@ class ComportamientoJugador : public Comportamiento{
     point PuntoOrientado(const state &st,Orientacion brujula);
     point BuscaPunto(const state &st);
     point Seguir(const state &st);
+    Action Movimiento(const vector<unsigned char> &v, const state &st, unsigned char c);
+    bool CasillaPosible(int x, int y, const vector<vector<unsigned char>> &mapa);
+    Orientacion Investiga(const vector<vector<unsigned char>> &mapa, const point &casilla, unsigned char c);
+    Orientacion PorExplorar(const vector<vector<unsigned char>> &mapa, unsigned char c);
+    void CambiarHijos(const point &p);
+    void AsignarRecorridos(vector<vector<Importantes>> &matriz, const point &p, int cual, int valor);
+    void CambiarDisOrigen(const point &p);
+    void CambiarBateria(const point &p);
+    void ActualizacionGlobal();
+    point CalculaPunto(const point &p, Orientacion org, int pos);
+
+    
 
     void RellenarBorde(vector<vector<unsigned char>> &matriz){
-    for(int i = 0; i < matriz.size(); i++){
-      for (int j = 0; j<3; j++){
-        matriz.at(i).at(j) = matriz.at(j).at(i) = matriz.at(matriz.size() -1 - j).at(i) = matriz.at(i).at(matriz.size() -1 - j) ='P';
+      for(int i = 0; i < matriz.size(); i++){
+        for (int j = 0; j<3; j++){
+          matriz.at(i).at(j) = matriz.at(j).at(i) = matriz.at(matriz.size() -1 - j).at(i) = matriz.at(i).at(matriz.size() -1 - j) ='P';
+        }
       }
     }
 
-}
+    void init(){
+      current_state = state();
+      last_action = actIDLE;
+      tam = mapaResultado.size();
+
+      RellenarBorde(mapaResultado);
+
+      for(int i = 0; i < mapaResultado.size(); i++){
+        vector<unsigned char> v; 
+        for (int j = 0; j < mapaResultado.size(); j++){
+          unsigned char c = '?'; 
+          v.push_back(c);
+        }
+        mapa_aux.push_back(v);
+      }
+
+      for(int i = 0; i < mapaResultado.size(); i++){
+        vector<Importantes> v; 
+        for (int j = 0; j < mapaResultado.size(); j++){
+          Importantes c = Importantes();
+          c.hijos = pow((intervalo+1),2);
+          v.push_back(c);
+        }
+        mapa_recorrido.push_back(v);
+      }
+
+      mapa_recorrido.at(0).at(0).dis_origen = 0;
+
+      for(int i = 0; i < 3; i++){
+        queue<point>cola; 
+        Por_actualizar.push_back(cola);
+      }
+    }
+
+
+
+
 
   private:
       state current_state;
       Action last_action;
       vector<vector<unsigned char>> mapa_aux; 
       int tam;
+      /*
+        0.Bateria
+        1.dis_origen
+        2.Hijos
+      
+      */
+      vector<queue<point>> Por_actualizar; 
+      vector<vector<Importantes>> mapa_recorrido; 
+      static const int intervalo = 3; 
 
       
 };
