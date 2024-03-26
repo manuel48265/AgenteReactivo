@@ -79,6 +79,7 @@ struct necesidad{
   bool atrapado_muros;
   bool investiga;
   bool salida_muros;
+  bool rebasar;
 
   necesidad(){
     bien_ubicado = false;
@@ -88,6 +89,7 @@ struct necesidad{
     atrapado_muros = false;
     investiga = false;
     salida_muros = false; 
+    rebasar = false;
   }
 
   necesidad(const necesidad &n){
@@ -98,6 +100,7 @@ struct necesidad{
       bateria = n.bateria;
       atrapado_muros = n.atrapado_muros;
       investiga = n.investiga;
+      rebasar = n.rebasar;
     }
     
   }
@@ -111,7 +114,7 @@ struct state{
     Orientacion brujula_virtual;
     point target;
     necesidad condiciones; 
-    Orientacion way;
+    int way;
 
     state(){
     p_real = point(0,0);
@@ -120,7 +123,7 @@ struct state{
     brujula_virtual = norte;
     target = point(-1,-1);
     condiciones = necesidad(); 
-    way = norte; 
+    way = -1; 
     }
 
 };
@@ -129,12 +132,14 @@ struct Importantes{
   int dis_origen;
   int bateria; 
   int hijos; 
+  int huida;
   
 
   Importantes(){
     dis_origen = -1;
     bateria = -1;
     hijos = 0;
+    huida = -1;
   }
 
   Importantes& operator=(const Importantes &rhs );
@@ -240,6 +245,7 @@ class ComportamientoJugador : public Comportamiento{
     ComportamientoJugador(unsigned int size) : Comportamiento(size){
       // Constructor de la clase
       // Dar el valor inicial a las variables de estado
+      /*
       current_state = state();
       last_action = actIDLE;
       tam = mapaResultado.size();
@@ -259,7 +265,7 @@ class ComportamientoJugador : public Comportamiento{
         vector<Importantes> v; 
         for (int j = 0; j < mapaResultado.size(); j++){
           Importantes c = Importantes();
-          c.hijos = pow((intervalo+1),2);
+          c.hijos = pow((2*intervalo+1),2);
           v.push_back(c);
         }
         mapa_recorrido.push_back(v);
@@ -271,6 +277,11 @@ class ComportamientoJugador : public Comportamiento{
         queue<point>cola; 
         Por_actualizar.push_back(cola);
       }
+
+      cont_bateria = 0;
+
+      */
+      init();
       
 
 
@@ -305,6 +316,10 @@ class ComportamientoJugador : public Comportamiento{
     void CambiarBateria(const point &p);
     void ActualizacionGlobal();
     point CalculaPunto(const point &p, Orientacion org, int pos);
+    void Actualizar(point &p, const Orientacion &brujula, int k);
+    Action Andar_Correr(const vector<unsigned char> &agentes);
+    point Mas_Cercana();
+    void CambiarHuida (const point &p);
 
     
 
@@ -336,7 +351,7 @@ class ComportamientoJugador : public Comportamiento{
         vector<Importantes> v; 
         for (int j = 0; j < mapaResultado.size(); j++){
           Importantes c = Importantes();
-          c.hijos = pow((intervalo+1),2);
+          c.hijos = pow((2*intervalo+1),2);
           v.push_back(c);
         }
         mapa_recorrido.push_back(v);
@@ -348,6 +363,16 @@ class ComportamientoJugador : public Comportamiento{
         queue<point>cola; 
         Por_actualizar.push_back(cola);
       }
+
+      cont_bateria = 0;
+
+      srand(time(NULL));
+
+      orientacion_deseada = norte; 
+
+      ir_accesible = false; 
+
+      
     }
 
 
@@ -363,11 +388,17 @@ class ComportamientoJugador : public Comportamiento{
         0.Bateria
         1.dis_origen
         2.Hijos
+        3.Huida
       
       */
       vector<queue<point>> Por_actualizar; 
       vector<vector<Importantes>> mapa_recorrido; 
+      int cont_bateria; 
       static const int intervalo = 3; 
+      Orientacion orientacion_deseada; 
+      bool ir_accesible;
+      point origen_huida;
+
 
       
 };
