@@ -292,7 +292,7 @@ class ComportamientoJugador : public Comportamiento{
 
     Action think(Sensores sensores);
     int interact(Action accion, int valor);
-    int CBateria(unsigned char v, const state &st, bool correr,bool girar);
+    int CBateria(unsigned char v, bool correr,bool girar);
     int ValCasilla(unsigned char v, const state &st);
     Orientacion CalOrientacion(point a, point b);
     void PonerTerrenoEnMatriz(const vector<unsigned char> & terreno, state &st, vector<vector<unsigned char>> &matriz, bool act_cola);
@@ -320,6 +320,10 @@ class ComportamientoJugador : public Comportamiento{
     Action Andar_Correr(const vector<unsigned char> &agentes);
     point Mas_Cercana();
     void CambiarHuida (const point &p);
+    int CosteManiobra(int i);
+    int CosteMedioCasilla( unsigned char c);
+    int Explorara(const point &p, Orientacion ori, const Sensores &sen );
+    void ExtraeTerreno(const point &p, Orientacion ori, const Sensores &sen, vector<unsigned char> &v);
 
     
 
@@ -338,14 +342,21 @@ class ComportamientoJugador : public Comportamiento{
 
       RellenarBorde(mapaResultado);
 
+      mapa_aux = vector<vector<unsigned char>>(); 
+      frecuencias = vector<vector<int>>();
+
       for(int i = 0; i < mapaResultado.size(); i++){
         vector<unsigned char> v; 
+        vector<int> vi;
         for (int j = 0; j < mapaResultado.size(); j++){
           unsigned char c = '?'; 
           v.push_back(c);
+          vi.push_back(0);
         }
         mapa_aux.push_back(v);
+        frecuencias.push_back(vi);
       }
+      mapa_recorrido = vector<vector<Importantes>>();
 
       for(int i = 0; i < mapaResultado.size(); i++){
         vector<Importantes> v; 
@@ -358,8 +369,8 @@ class ComportamientoJugador : public Comportamiento{
       }
 
       mapa_recorrido.at(0).at(0).dis_origen = 0;
-
-      for(int i = 0; i < 3; i++){
+      Por_actualizar = vector<queue<point>>();
+      for(int i = 0; i < 4; i++){
         queue<point>cola; 
         Por_actualizar.push_back(cola);
       }
@@ -371,6 +382,8 @@ class ComportamientoJugador : public Comportamiento{
       orientacion_deseada = norte; 
 
       ir_accesible = false; 
+
+      pasos = 0; 
 
       
     }
@@ -398,6 +411,11 @@ class ComportamientoJugador : public Comportamiento{
       Orientacion orientacion_deseada; 
       bool ir_accesible;
       point origen_huida;
+      int pasos;
+      int pasos_agua;
+      int pasos_bosque; 
+      vector<vector<int>> frecuencias;
+
 
 
       
