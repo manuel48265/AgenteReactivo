@@ -268,6 +268,8 @@ class ComportamientoJugador : public Comportamiento{
         no_agentes.push_back(true);
       }
 
+      accion_vacia = 0; 
+
 
       
     }
@@ -298,6 +300,7 @@ class ComportamientoJugador : public Comportamiento{
       vector<vector<int>> frecuencias;
       int bateria_anterior;
       vector<bool> no_agentes;
+      int accion_vacia; 
 
 
 

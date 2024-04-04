@@ -973,6 +973,7 @@ void ComportamientoJugador::ReseteoHuida(){
 Action ComportamientoJugador::think(Sensores sensores){
 
 	Action accion = actIDLE;
+	
 
 	// Mostrar el valor de los sensores
 	cout << "Posicion: fila " << sensores.posF << " columna " << sensores.posC;
@@ -999,6 +1000,8 @@ Action ComportamientoJugador::think(Sensores sensores){
 	cout << "  Reset: " << sensores.reset;
 	cout << "  Vida: " << sensores.vida << endl<< endl;
 
+	
+
 	//std::this_thread::sleep_for(std::chrono::seconds(3));
 
 	//Modificar variables
@@ -1011,12 +1014,14 @@ Action ComportamientoJugador::think(Sensores sensores){
 			for(int i = 0; i < 16; i++){
         		no_agentes.at(i) = true;
       		}
+			accion_vacia = 0;
 			break;
 		case actRUN:
 			Actualizar(current_state.p_virtual.fil,current_state.p_virtual.col,current_state.brujula_virtual,2);
 			for(int i = 0; i < 16; i++){
         		no_agentes.at(i) = true;
       		}
+			accion_vacia = 0;
 			break;
 
 		case actTURN_L:
@@ -1029,6 +1034,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 			for(int i = 8; i < 16; i++){
 				no_agentes.at(8+(i+2)%8) = aux_bool.at(i);
 			}
+			accion_vacia++;
 
 			break;
 
@@ -1042,14 +1048,14 @@ Action ComportamientoJugador::think(Sensores sensores){
 			for(int i = 8; i < 16; i++){
 				no_agentes.at(8+(i+7)%8) = aux_bool.at(i);
 			}
+			accion_vacia++;
 			break;
 		
 		default:
+			accion_vacia++;
 			break;
 		}
 	}
-
-	cout << last_action << endl; 
 
 
 	//Actualizamos el punto
@@ -1078,6 +1084,12 @@ Action ComportamientoJugador::think(Sensores sensores){
 			}
 		}
 
+	}
+
+	if(accion_vacia > 8){
+		for(int i = 0; i < 16; i++){
+        	no_agentes.at(i) = true;
+      	}
 	}
 
 
@@ -1135,13 +1147,6 @@ Action ComportamientoJugador::think(Sensores sensores){
 	}
 
 	ActualizacionGlobal();	
-
-	for(int i = 0; i < mapa_aux.size(); i++){
-		for(int j = 0; j < mapa_aux.size(); j++){
-			cout << mapa_aux.at(i).at(j);
-		}
-		cout << endl; 
-	}
 
 	bool entra = false; 
 	bool primero = false;
@@ -1279,12 +1284,6 @@ Action ComportamientoJugador::think(Sensores sensores){
 			Actualizar(p,static_cast<Orientacion>((current_state.brujula_virtual + i)%8), 1);
 			v.push_back(p);
 			c = mapa_aux.at(v.at(i).fil).at(v.at(i).col);
-			cout << current_state.brujula_virtual << endl; 
-			cout << static_cast<Orientacion>((current_state.brujula_virtual + i)%8) << endl; 
-			cout << current_state.p_virtual.to_s() << endl;
-			cout << p.to_s() << endl; 
-
-			cout << c << endl; 
 			if( c == 'M' or c == 'P'){
 				disponible.at(i) = disponible.at(i + 8) = false;
 			}
@@ -1305,10 +1304,10 @@ Action ComportamientoJugador::think(Sensores sensores){
 		}
 
 		for(int i = 0; i < 16; i++){
-			if(disponible.at(i)){
+			if(disponible.at(i) and no_agentes.at(i)){
 				cout << "true" << endl; 
 			}else{
-				cout << "false" << endl; 
+				cout << false << endl; 
 			}
 		}
 
@@ -1360,6 +1359,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 					}
 					
 					
+					
 					if(valor > max ){
 						max = valor;
 						index = i; 
@@ -1371,7 +1371,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 			for(int i = 0; i < 16; i++){
 			
-				if(disponible.at(i)){
+				if(disponible.at(i) and no_agentes.at(i)){
 
 					entradas_bucle++;
 
@@ -1446,6 +1446,9 @@ Action ComportamientoJugador::think(Sensores sensores){
 						max = valor;
 						index = i; 
 					}
+					cout << "mover" << endl; 
+					cout << valor << endl;
+					cout << index << endl; 
 
 				}
 			}
@@ -1460,7 +1463,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 			if(huida){
 				for(int i = 0; i < 16; i++){
 				
-					if(disponible.at(i)){
+					if(disponible.at(i) and no_agentes.at(i)){
 
 						bateria = CosteManiobra(i%8);
 						bateria += CosteMedioCasilla(mapa_aux.at(v.at(i).fil).at(v.at(i).col));
@@ -1496,6 +1499,10 @@ Action ComportamientoJugador::think(Sensores sensores){
 							max = valor;
 							index = i; 
 						}
+
+						cout << "huir" << endl; 
+						cout << valor << endl;
+						cout << index << endl; 
 
 					}
 				}
