@@ -14,15 +14,6 @@
 using namespace std;
 
 
-struct myComp {
-    constexpr bool operator()(
-        pair<point , int> const& a,
-        pair<point , int> const& b)
-        const noexcept
-    {
-        return a.second < b.second;
-    }
-};
 
 Importantes& Importantes::operator=(const Importantes &rhs ){
 	if(this != &rhs){
@@ -132,64 +123,6 @@ point ComportamientoJugador::PuntoOrientado(const state &st,Orientacion brujula)
 	return (p);
 }
 
-bool ComportamientoJugador::CasillaPosible(int x, int y, const vector<vector<unsigned char>> &mapa){
-	unsigned char c;
-	int i = -1;
-	int j = -1;
-	bool posible = false;
-
-	while( i <= 1 and !posible){
-		while ( j <= 1 and !posible){
-			c = Dato(mapa,point(x+i,y+j));
-
-			if((c != 'M' and c != 'P') and (i != 0 and j != 0)){
-				posible = true; 
-			}
-			j++;
-		}
-		j = -1;
-		i++;
-	}
-
-	return posible;
-}
-
-
-
-point ComportamientoJugador::BuscaPunto(const state &st){
-	int random = rand()%7;
-	random++;
-	point p = st.p_virtual;
-	for(int i = 0 ; i < 4; i++){
-		Actualizar(p.fil,p.col,static_cast<Orientacion>((st.brujula_virtual + random)%8),1);
-	}
-
-	return(p);
-}
-
-point ComportamientoJugador::Seguir(const state &st){
-	point p = st.p_virtual;
-	for(int i = 0 ; i < 4; i++){
-		Actualizar(p.fil,p.col,st.brujula_virtual,1);
-	}
-
-	return(p);
-}
-
-
-
-/*
-casilla& casilla::operator= (const casilla& otro){
-	if(this != &otro){
-		this->p = otro.p;
-		this->valoracion = otro.valoracion;
-		this->pasos = otro.pasos;
-		this->valor = otro.valor;
-	}
-	return(*this);
-}
-*/
-
 int ComportamientoJugador::CBateria(unsigned char v, bool correr,bool girar){
   int coste;
   
@@ -260,105 +193,8 @@ int ComportamientoJugador::CBateria(unsigned char v, bool correr,bool girar){
 
 }
 
-Action ComportamientoJugador::Andar_Correr(const vector<unsigned char> &agentes){
-	Action devolver; 
-	point there = current_state.p_virtual;
-	point next_1 = current_state.p_virtual;
-	point next_2 = current_state.p_virtual;
-
-	Actualizar(next_1,current_state.brujula_virtual,1);
-	Actualizar(next_2,current_state.brujula_virtual,2);
-
-	if((mapa_aux.at(next_2.fil).at(next_2.col) != 'M' and mapa_aux.at(next_2.fil).at(next_2.col) != 'P' and mapa_aux.at(next_2.fil).at(next_2.col) != '?') and agentes.at(6) == '_'){
-		int suma1 = CBateria(mapa_aux.at(there.fil).at(there.col),0,0) + CBateria(mapa_aux.at(next_1.fil).at(next_1.col),0,0);
-		int suma2 = CBateria(mapa_aux.at(there.fil).at(there.col),1,0);
-
-		if(suma1 >= suma2){
-			devolver = actRUN;
-		}else{
-			devolver = actWALK;
-		}
-
-	}else{
-		devolver = actWALK;
-
-	}
-
-	return devolver; 
-
-
-}	
-
-point ComportamientoJugador::Mas_Cercana(){
-	point devolver = point(-1,-1); 
-	const int VALOR = 1; 
-	int i,j,incremento_i,incremento_j;
-
-
-
-	switch(rand()%4){
-		default:
-		case 0:
-			i = -VALOR;
-			j = -VALOR;
-			incremento_i = 1;
-			incremento_j = 1;
-			break;
-		case 1:
-			i = VALOR;
-			j = -VALOR;
-			incremento_i = -1;
-			incremento_j = 1;
-		case 2:
-			i = VALOR ;
-			j = VALOR ;
-			incremento_i = -1;
-			incremento_j = -1;
-		case 3: 
-			i = VALOR;
-			j = -VALOR;
-			incremento_i = -1;
-			incremento_j = 1;
-
-			break; 
-	}
-	bool encontrado = false;
-	int x_virtual;
-	int y_virtual;
-	while(abs(i) != VALOR +1 and !encontrado){
-		while(abs(j) != VALOR + 1 and !encontrado ){
-			x_virtual = (current_state.p_virtual.fil + i + 4*tam)%tam;
-			y_virtual = (current_state.p_virtual.col + j + 4*tam)%tam; 
-
-			if(mapa_recorrido.at(x_virtual).at(y_virtual).hijos > 0 and mapa_recorrido.at(x_virtual).at(y_virtual).dis_origen != -1){
-				encontrado = true;
-				devolver = point(x_virtual,y_virtual);
-			}
-			i+=incremento_i;
-			j+=incremento_j;
-		}
-
-	}
-
-	return devolver; 
-
-}
-
 Action ComportamientoJugador::Movimiento(const vector<unsigned char> &v, const state &st, unsigned char c){
 	Action action; 
-
-	/*
-
-	if(v.at(2) == c or v.at(6) == c or v.at(12) == c){
-		action = actWALK;
-	}else if(v.at(3) == c or v.at(8) == c or v.at(15) == c ){
-		action = actTURN_SR;
-	}else if(v.at(1) == c or v.at(4) == c or v.at(9) == c){
-		action = actTURN_L;
-	}else {
-		action = actWALK;
-	} 
-	*/
 
 	if(v.at(2) == c){
 		action = actWALK;
@@ -419,21 +255,6 @@ Action ComportamientoJugador::Movimiento(const vector<unsigned char> &v, const s
 	
 
 }
-
-/*
-  Condiciones:
-    0. Nos indica si el usuario está ubicado
-      Da prioridad a buscar una casilla tipo 'G'
-    1. Nos indica si tenemos o no las zapatillas
-      Da prioridad a la búsqueda de una casilla 'D'
-      Modifica la toma de decisiones, pues correr puede gastar menos batería.
-    2. Nos indica si tenemos o no el Bikini 
-      Da prioridad a la búsqueda de una casilla 'K'
-      Modifica la toma de decisiones, pues correr puede gastar menos batería.
-    3.Batería un bool que nos indica si queda batería (susceptible de ser cambiado)
-      Perder por culpa de la batería puede ser un gran problema.
-      Tomará acciones más conservadoras para evitar gastar batería.
-  */
 
 int ComportamientoJugador::ValCasilla(unsigned char v, const state &st){
 	int coste;
@@ -534,91 +355,6 @@ point& point::operator =(const point &p){
   return *this;
 }
 
-/*
-
-bool casilla::operator< (const casilla& otro)const{
-  return (this->p < otro.p);
-}
-
-bool casilla::comparaPunteros (const casilla*& uno, const casilla*& otro){
-    return ((*uno) < (*otro));
-}
-
-int Ajuste(int i, int adjust){
-	if(i >= 0 and i <= adjust){
-		return i;
-	}else if(i > adjust){
-		return adjust;
-	}else {
-		return 0;
-	}
-}
-
-/*
-
-void CalculoCasilla(int i,const state &st, const vector<vector<unsigned char>> &matriz, bool orden, point &p, bool &no_vacio){
-	cout << "aqui6" << endl;
-	int j = i;
-	if (orden){
-		while(no_vacio and j <= -i){
-			if(matriz.at(Ajuste(st.p_virtual.fil+i,matriz.size()-1)).at(Ajuste(st.p_virtual.col + j,matriz.size()-1)) == '?'){
-				no_vacio = false; 
-				p.fil = Ajuste(st.p_virtual.fil+i,matriz.size()-1);
-				p.col = Ajuste(st.p_virtual.col + j,matriz.size()-1);
-
-			}
-			j++;
-			cout << j << endl;
-		}
-	}else{
-		
-		while(no_vacio and j <= -i){
-			if(matriz.at(Ajuste(st.p_virtual.fil + j,matriz.size()-1)).at(Ajuste(st.p_virtual.col + i,matriz.size()-1)) == '?'){
-				no_vacio = false; 
-				p.fil = Ajuste(st.p_virtual.fil + j,matriz.size()-1);
-				p.col = Ajuste(st.p_virtual.col + i,matriz.size()-1);
-
-			}
-			j++;
-			cout << j << endl;
-		}
-	}
-	
-}
-
-*/
-
-
-
-/*
-point ExploracionLocal(const state &st, const vector<vector<unsigned char>> &matriz){
-	cout << "aqui3" << endl;
-	int i = -4;
-
-	bool no_vacio = true;
-
-	point p = point(st.p_virtual.fil, st.p_virtual.col);
-	while(no_vacio and i > -8){
-		CalculoCasilla(-i,st,matriz, 0, p, no_vacio);
-		if(no_vacio){
-			CalculoCasilla(-i,st,matriz, 1, p, no_vacio);
-			if(no_vacio){
-				CalculoCasilla(i,st,matriz, 0, p, no_vacio);
-				if(no_vacio){
-					CalculoCasilla(i,st,matriz, 1, p, no_vacio);
-				}
-			}
-		}
-		i--;
-	}
-
-	return p;
-}
-*/
-
-
-
-
 Orientacion ComportamientoJugador::CalOrientacion(point a, point b){
 
 	int x = (b.col + (- a.col + 3*tam))%tam;
@@ -652,77 +388,6 @@ Orientacion ComportamientoJugador::CalOrientacion(point a, point b){
 			tmp = noroeste;
 		}
 	}
-	
-
-
-
-	/*
-
-	if(y = 0){
-		if (x > 0){
-			tmp = Orientacion::este;
-		}else{
-			tmp = Orientacion::oeste;
-		}
-	}
-	else if(x = 0){
-		if (y > 0){
-			tmp = Orientacion::sur;
-		}else{
-			tmp = Orientacion::norte;
-		}
-	}else{
-		double z = 1.0*y/x;
-		if (z > 0){
-			if(y > 0){
-				if(z > sqrt(3)){
-					tmp = Orientacion::sur;
-
-				} else if(z < 1/sqrt(3)){
-					tmp = Orientacion::este;
-				}else{
-					tmp = Orientacion::sureste; 
-				}
-
-			}else {
-				if(z > sqrt(3)){
-					tmp = Orientacion::norte;
-
-				} else if(z < 1/sqrt(3)){
-					tmp = Orientacion::este;
-
-				}else{
-					tmp = Orientacion::noreste;
-				}
-				
-				
-			}
-		}else{
-			if(y > 0){
-				if(-z > sqrt(3)){
-					tmp = Orientacion::sur;
-
-				} else if(-z < 1/sqrt(3)){
-					tmp = Orientacion::oeste;
-				}else{
-					tmp = Orientacion::suroeste; 
-				}
-
-			}else{
-				if(-z > sqrt(3)){
-					tmp = Orientacion::norte;
-
-				} else if(-z < 1/sqrt(3)){
-					tmp = Orientacion::este;
-				}else{
-					tmp = Orientacion::noreste; 
-				}
-				
-				
-			}
-		}
-	}
-	*/
 
 	return tmp;
 
@@ -732,128 +397,6 @@ Orientacion ComportamientoJugador::CalOrientacion(point a, point b){
 }
 
 
-point MasVacio(const vector<vector<unsigned char>> &matriz){
-	int i_max=0;
-	int j_max=0;
-	int max_j_counter = 0;
-	int max_i_counter = 0;
-	vector<int> j_vector;
-	vector<int> i_vector;
-	for(int i = 0; i< matriz.size(); i++){
-		j_vector.push_back(0);
-		i_vector.push_back(0);
-	}
-	for(int i = 0; i< matriz.size(); i++){
-		for(int j=0; j<matriz.size(); j++){
-			if (matriz.at(i).at(j) == '?'){
-				j_vector.at(j)++;
-				i_vector.at(i)++;
-			}
-		}
-	}
-	for(int i = 3; i< matriz.size() -3; i++){
-		if(j_vector.at(i) > max_j_counter){
-			max_j_counter = j_vector.at(i);
-			j_max = i;
-		}
-		if(i_vector.at(i) > max_i_counter){
-			max_i_counter = i_vector.at(i);
-			i_max = i;
-		}
-	}
-	point p(i_max,j_max);
-	p.fil = i_max;
-	p.col = j_max;
-
-	return p;
-	
-}
-
-
-/*
-
-void NuevaRuta(const state &st, const vector<vector<unsigned char>> &matriz){
-	cout << "aqui9" << endl;
-	point p(st.p_virtual.fil,st.p_virtual.col);
-		
-	point q = MasVacio(matriz);
-	
-
-	cout << p.fil << "," << p.col << endl;
-	cout << q.fil << "," << q.col << endl;
-
-	CambiaDir(st.brujula_virtual,pq,CalOrientacion(p,q,Ma));
-
-}
-*/
-
-/*
-
-void RutinaExploracion(const vector<unsigned char> & terreno, Action &accion, unsigned int &algoritmo, const state &st, const vector<vector<unsigned char>> &matriz, priority_queue<rutina> &pq){
-	cout << "aqui10" << endl;
-	point p(st.p_virtual);
-	for(int i = 0; i <4; i++){
-		Actualizar(p_virtual.fil,p_virtual.col,st.brujula_virtual);
-	}
-	p_virtual.fil = Ajuste(p_virtual.fil,matriz.size()-1);
-	p_virtual.col = Ajuste(p_virtual.col,matriz.size()-1);
-	
-	if((terreno[2] == 'T' or terreno[2] =='S' or terreno[2] == 'G' or terreno[2] == 'B' )
-		and (matriz.at(p_virtual.fil).at(p_virtual.col) == '?')){
-			accion = actWALK;
-		}
-		else if((matriz.at(p_virtual.fil).at(p_virtual.col) == '?')) {
-			accion =actTURN_L;
-			algoritmo = 0;
-		}else{
-			NuevaRuta(st,matriz,pq);
-		}
-}
-
-*/
-
-/*
-
-void Explorar(point inicio,const vector<vector<casilla>> &matriz,point target,list<casilla*> &lis){
-	set<casilla> visitados; 
-	priority_queue<casilla*,vector<casilla*>,casilla::operator()> desarrollo; 
-
-	casilla* top = matriz.at(inicio.fil).at(inicio.col);
-	casilla* back = matriz.at(target.fil).at(target.col);
-
-	top->setPadre(nullptr);
-
-	int dist =(*top).dis(*target);
-	int iteraciones = 0;
-
-	visitados.insert(matriz.at((*top).p_virtual.fil).at((*top).p_virtual.col));
-
-
-	while((*top->dis(*target) != 0) and (iteraciones < 150)){
-		for(int i = -1; i <= 1; i++){
-			for(int j = -1; j<=1; j++ ){
-				if(visitados.insert(matriz.at(((*top).p_virtual.fil+i)%matriz.size()).at(((*top).p_virtual.col+j)%matriz.size())).second == true ){
-					if(matriz.at(((*top).p_virtual.fil+i)%matriz.size()).at(((*top).p_virtual.col+j)%matriz.size()).valor != 'M' and matriz.at(((*top).p_virtual.fil+i)%matriz.size()).at(((*top).p_virtual.col+j)%matriz.size()).valor != 'P' ){
-						matriz.at(((*top).p_virtual.fil+i)%matriz.size()).at(((*top).p_virtual.col+j)%matriz.size()).CalculaValoracion(*target);
-						matriz.at(((*top).p_virtual.fil+i)%matriz.size()).at(((*top).p_virtual.col+j)%matriz.size()).setPadre(top);
-						desarrollo.push(&matriz.at(((*top).p_virtual.fil+i)%matriz.size()).at(((*top).p_virtual.col+j)%matriz.size()));
-					}
-				}
-			}
-		}
-
-		top = desarrollo.top();
-		desarrollo.pop();
-	}
-
-	while(top->padre != nullptr){
-		lis.emplace_front(top);
-		top = top->padre;
-	}
-
-}
-
-*/
 
 void ComportamientoJugador::CambiarHijos(const point &p){
 
@@ -926,7 +469,6 @@ void ComportamientoJugador::CambiarHuida (const point &p){
 		}
 
 		if(min != tam*tam and (mapa_recorrido.at(p.fil).at(p.col).huida < 0 or  mapa_recorrido.at(p.fil).at(p.col).huida > min +1 )){
-
 			mapa_recorrido.at(p.fil).at(p.col).huida = min + 1;
 
 			for(int i = 0; i < 8; i++){
@@ -934,11 +476,23 @@ void ComportamientoJugador::CambiarHuida (const point &p){
 				Actualizar(q.fil,q.col,static_cast<Orientacion>(i),1);
 				if(mapa_aux.at(q.fil).at(q.col) != '?' and mapa_aux.at(q.fil).at(q.col) != 'M' and mapa_aux.at(q.fil).at(q.col) != 'P'){
 					if(mapa_recorrido.at(q.fil).at(q.col).huida > min + 1 or mapa_recorrido.at(q.fil).at(q.col).huida < 0){
-						Por_actualizar.at(1).push(q);
+						Por_actualizar.at(3).push(q);
 					}
 				}
 			}
 
+		}
+
+		if(mapa_recorrido.at(p.fil).at(p.col).huida == 0){
+			for(int i = 0; i < 8; i++){
+				q = p; 
+				Actualizar(q.fil,q.col,static_cast<Orientacion>(i),1);
+				if(mapa_aux.at(q.fil).at(q.col) != '?' and mapa_aux.at(q.fil).at(q.col) != 'M' and mapa_aux.at(q.fil).at(q.col) != 'P'){
+					if(mapa_recorrido.at(q.fil).at(q.col).huida > min + 1 or mapa_recorrido.at(q.fil).at(q.col).huida < 0){
+						Por_actualizar.at(3).push(q);
+					}
+				}
+			}
 		}
 
 	}
@@ -965,6 +519,18 @@ void ComportamientoJugador::CambiarBateria(const point &p){
 		if(min != tam*tam and (mapa_recorrido.at(p.fil).at(p.col).bateria < 0 or  mapa_recorrido.at(p.fil).at(p.col).bateria > min +1 )){
 			mapa_recorrido.at(p.fil).at(p.col).bateria = min + 1;
 
+			for(int i = 0; i < 8; i++){
+				q = p; 
+				Actualizar(q.fil,q.col,static_cast<Orientacion>(i),1);
+				if(mapa_aux.at(q.fil).at(q.col) != '?' and mapa_aux.at(q.fil).at(q.col) != 'M' and mapa_aux.at(q.fil).at(q.col) != 'P'){
+					if(mapa_recorrido.at(q.fil).at(q.col).bateria > min + 1 or mapa_recorrido.at(q.fil).at(q.col).bateria < 0){
+						Por_actualizar.at(0).push(q);
+					}
+				}
+			}
+		}
+
+		if(mapa_recorrido.at(p.fil).at(p.col).bateria == 0){
 			for(int i = 0; i < 8; i++){
 				q = p; 
 				Actualizar(q.fil,q.col,static_cast<Orientacion>(i),1);
@@ -1004,7 +570,7 @@ void ComportamientoJugador::ActualizacionGlobal(){
 
 		CambiarHijos(p);
 	}
-	while(!Por_actualizar.at(3).empty()){
+	while(!Por_actualizar.at(3).empty()){ 
 		p = Por_actualizar.at(3).front();
 		Por_actualizar.at(3).pop();
 
@@ -1124,7 +690,6 @@ point ComportamientoJugador::CalculaPunto(const point &p, Orientacion org, int p
 		}
 		
 		int z = pos - j*(j+1);
-		cout << "mira: "<< j << "," << z << endl; 
 		if(org%2 == 0){
 			Actualizar(devolver.fil,devolver.col,org,j);
 			if(z > 0){
@@ -1148,124 +713,6 @@ point ComportamientoJugador::CalculaPunto(const point &p, Orientacion org, int p
 
 	return devolver;
 }
-
-
-Orientacion ComportamientoJugador::Investiga(const vector<vector<unsigned char>> &mapa, const point &casilla, unsigned char c){
-
-	Orientacion way; 
-	bool acaba = false; 
-	bool incrementa = true;
-
-
-	int x,y,z,w;
-	x = z = casilla.fil;
-	y = w = casilla.col;
-
-	while (!acaba and incrementa){
-		
-		incrementa = false; 
-
-		if(x != 0){
-			x--;
-			incrementa = true; 
-		}
-		if( y != 0){
-			y--;
-			incrementa = true; 
-		}
-		if( z != mapa.size() -1){
-			z++;
-			incrementa = true; 
-		}
-		if( w!= mapa.size() -1){
-			w++;
-			incrementa = true; 
-		}
-
-		if(mapa.at(x).at(casilla.col) == c ){
-			way = norte;
-			acaba = true;
-
-		}else if(mapa.at(z).at(casilla.col) == c ){
-			way = sur; 
-			acaba = true;
-
-		}else if(mapa.at(casilla.fil).at(y) == c){
-			way = oeste; 
-			acaba = true;
-
-		}else if(mapa.at(casilla.fil).at(w) == c){
-			way = este;
-			acaba = true;
-
-		}
-
-	}
-
-	if(!incrementa){
-		way = noreste;
-	}
-
-	return way;
-	
-}
-
-
-
-Orientacion ComportamientoJugador::PorExplorar(const vector<vector<unsigned char>> &mapa, unsigned char c){
-	vector<point> vec;
-	vector<int> vi;
-	bool actualiza = true; 
-	for(int i = 0; i < 8; i++){
-		vec.push_back(current_state.p_virtual);
-		vi.push_back(0);
-	}
-
-	if(!current_state.condiciones.bien_ubicado){
-		for(int i = 0; i < mapa.size()/5; i++){
-			for(int j = 0; j < 8; j++){
-				Actualizar(vec.at(j).fil,vec.at(j).col, static_cast<Orientacion>(j),1); 
-				if(Dato(mapa,vec.at(j)) == c){
-					vi.at(j)++;
-				}
-			}
-		}
-	}else{
-		int z = 0; 
-		while(actualiza){
-			actualiza = false; 
-			for(int j = 0; j < 8; j++){
-				if((vec.at(j).fil != 0 )and  (vec.at(j).fil != mapa.size() -1 )and  (vec.at(j).col != 0 )and(vec.at(j).col != mapa.size() -1) ){
-					Actualizar(vec.at(j).fil,vec.at(j).col, static_cast<Orientacion>(j),1); 
-					if(Dato(mapa,vec.at(j)) == c){
-						vi.at(j)++;
-					}
-					actualiza = true;
-				}
-
-			}
-			
-			z++;
-		}	
-	}
-
-	int max = -1;
-	int index = 0; 
-	for(int i = 0; i < 8; i++){
-		if(vi.at(i) > max){
-			max = vi.at(i);
-			index = i;
-		}
-	}
-
-	return(static_cast<Orientacion>(index));
-
-
-	
-
-	
-
-}	
 
 void ComportamientoJugador::ActulizarMapa(vector<vector<unsigned char>> &mapa_virtual, vector<vector<unsigned char>> &mapa_real, const state &st){ 
 	int x,y,z,w;
@@ -1335,6 +782,10 @@ void ComportamientoJugador::ActulizarMapa(vector<vector<unsigned char>> &mapa_vi
 			aux.at(pos_real.fil).at(pos_real.col) = mapa_recorrido.at(pos_virtual.fil).at(pos_virtual.col);
 			aux_i.at(pos_real.fil).at(pos_real.col) = frecuencias.at(pos_virtual.fil).at(pos_virtual.col);
 
+			if(mapa_real.at(pos_real.fil).at(pos_real.col) == 'X'){
+				aux.at(pos_real.fil).at(pos_real.col).bateria = 0; 
+			}
+
 			
 
 
@@ -1344,32 +795,6 @@ void ComportamientoJugador::ActulizarMapa(vector<vector<unsigned char>> &mapa_vi
 
 	mapa_recorrido = aux;
 
-}
-
-pair<point,int>  ComportamientoJugador::CalculaValoracion (const state &st,const vector<vector<unsigned char>> &matriz, const point &p){
-    
-
-	int sum = 0;
-    if(Igual(matriz, p,'M') or Igual(matriz, p,'P')){
-      sum = -50000;
-    }else{
-			double val = ValCasilla(Dato(matriz, p),st);
-			sum += val; 
-
-			if(st.brujula_virtual == CalOrientacion(st.p_virtual,p)){
-				sum += 100;
-			}
-
-			if( st.target != point(-1,-1) ){
-				sum += 5000/pow(st.target.dis(p,tam) + 1,2);
-			}
-    }
-
-	pair<point,int> par = pair<point,int>(p,sum); 
-
-    return par;
-
-    
 }
 
 int ComportamientoJugador::CosteManiobra(int i){
@@ -1470,6 +895,78 @@ void ComportamientoJugador::ExtraeTerreno(const point &p, Orientacion ori, const
 
 }
 
+point ComportamientoJugador::casillaHuida(){
+	
+	point p = point(3,3);
+	point pivote = point(0,0);
+	int suma; 
+	int max = 0;
+
+	for(int i = 0; i < mapa_aux.size(); i++){
+		for(int j = 0; j < mapa_aux.size(); j++){
+			if(mapa_recorrido.at(i).at(j).dis_origen != -1){
+				suma = 0;
+				/*
+				suma = mapa_recorrido.at(i).at(j).hijos; 
+				for(int k  = 0; k < 8; k++){
+					pivote = point(i,j);
+					Actualizar(pivote, static_cast<Orientacion>(i), 1);
+					suma += mapa_recorrido.at(pivote.fil).at(pivote.col).hijos; 
+				}
+				*/
+
+				for(int k = -3; k < 4; k++){
+					for(int l = -3; l < 4; l++){
+						suma += mapa_recorrido.at((i+k + 4*tam)%tam).at((j + l + 4*tam)%tam).hijos;
+					}
+				}
+
+				if( suma > max ){
+					p = point(i,j);
+					max = suma;
+				}
+			}
+		}
+	}
+
+	return p;
+}
+
+double ComportamientoJugador::ExploraHuida(point origen, point destino){
+
+	double explora = 0;
+	if(mapa_recorrido.at(destino.fil).at(destino.col).huida != -1){
+		explora = mapa_recorrido.at(origen.fil).at(origen.col).huida + 2; 
+		explora = explora - mapa_recorrido.at(destino.fil).at(destino.col).huida; 
+		
+	}else{
+		explora = 0;
+	}
+
+
+	//normalizo el resultado;
+	explora = explora/5;
+
+	return explora;
+}
+
+void ComportamientoJugador::ReseteoHuida(){
+	for(int i = 0; i < mapa_recorrido.size(); i++){
+		for(int j = 0; j < mapa_recorrido.size(); j++){
+			mapa_recorrido.at(i).at(j).huida = -1;
+ 		}
+	}
+
+	point p = casillaHuida();
+
+	mapa_recorrido.at(p.fil).at(p.col).huida = 0;
+
+	Por_actualizar.at(3).push(p);
+
+	ActualizacionGlobal();
+
+}
+
 
 
 
@@ -1506,30 +1003,54 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	//Modificar variables
 	if(sensores.colision == false){
+		vector<bool> aux_bool;
 		switch (last_action)
 		{
 		case actWALK:
 			Actualizar(current_state.p_virtual.fil,current_state.p_virtual.col,current_state.brujula_virtual,1);
+			for(int i = 0; i < 16; i++){
+        		no_agentes.at(i) = true;
+      		}
 			break;
 		case actRUN:
 			Actualizar(current_state.p_virtual.fil,current_state.p_virtual.col,current_state.brujula_virtual,2);
-
+			for(int i = 0; i < 16; i++){
+        		no_agentes.at(i) = true;
+      		}
 			break;
 
 		case actTURN_L:
 			current_state.brujula_virtual = static_cast<Orientacion>((current_state.brujula_virtual+6)%8);
+			aux_bool = no_agentes;
+
+			for(int i = 0; i<8; i++){
+				no_agentes.at((i+2)%8) = aux_bool.at(i);
+			}
+			for(int i = 8; i < 16; i++){
+				no_agentes.at(8+(i+2)%8) = aux_bool.at(i);
+			}
 
 			break;
 
 		case actTURN_SR:
 			current_state.brujula_virtual = static_cast<Orientacion>((current_state.brujula_virtual+1)%8);
+			aux_bool = no_agentes;
+
+			for(int i = 0; i<8; i++){
+				no_agentes.at((i+7)%8) = aux_bool.at(i);
+			}
+			for(int i = 8; i < 16; i++){
+				no_agentes.at(8+(i+7)%8) = aux_bool.at(i);
+			}
 			break;
 		
 		default:
 			break;
 		}
 	}
-	
+
+	cout << last_action << endl; 
+
 
 	//Actualizamos el punto
 
@@ -1543,13 +1064,28 @@ Action ComportamientoJugador::think(Sensores sensores){
 		current_state.brujula_real = sensores.sentido;
 		current_state.p_virtual = current_state.p_real;
 		current_state.brujula_virtual = current_state.brujula_real;
+		ActulizarMapa(mapa_aux,mapaResultado,current_state);
 		mapa_aux = vector<vector<unsigned char>>(mapaResultado);
 		current_state.target = point(-1,-1);
+		mapa_recorrido.at(0).at(0).dis_origen = -1;
+		mapa_recorrido.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).dis_origen = 0;
+		cont_bateria = 0;
+		for(int i = 0; i < mapa_aux.size(); i++){
+			for(int j = 0; j < mapa_aux.size(); j++){
+				if(mapa_aux.at(i).at(j) == 'X'){
+					cont_bateria++;
+				} 
+			}
+		}
 
 	}
 
 
 	ActualizacionGlobal();
+
+	if(mapa_recorrido.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).huida < 2 ){
+		huida = false; 
+	}
 
 
 
@@ -1565,23 +1101,24 @@ Action ComportamientoJugador::think(Sensores sensores){
 		current_state.brujula_virtual = current_state.brujula_real;
 		mapa_aux = vector<vector<unsigned char>>(mapaResultado);
 		current_state.target = point(-1,-1);
+		cont_bateria = bateria_anterior;
 
-	}else if (sensores.terreno.at(0) == 'D'){
+	}else if (sensores.terreno.at(0) == 'D' and !current_state.condiciones.zapatillas ){
 		current_state.condiciones.zapatillas = true;
 		current_state.target = point(-1,-1);
 
-	}else if(sensores.terreno.at(0) == 'K'){
+	}else if(sensores.terreno.at(0) == 'K' and !current_state.condiciones.bikini){
 		current_state.condiciones.bikini = true;
 		current_state.target = point(-1,-1);
 
 	}
 
-	if (sensores.bateria < 1000 and sensores.vida > 300){
+	if (sensores.bateria < 2000 and sensores.vida > 500){
 		current_state.condiciones.bateria = true;
 		current_state.condiciones.investiga = false; 
 
 	}
-	if (sensores.bateria > 3500 or sensores.vida < 300){
+	if (sensores.bateria > 4500 or sensores.vida < 500){
 		current_state.condiciones.bateria = false;
 
 	}
@@ -1597,34 +1134,18 @@ Action ComportamientoJugador::think(Sensores sensores){
 		PonerTerrenoEnMatriz(sensores.terreno,current_state,mapaResultado,false);
 	}
 
-	ActualizacionGlobal();
+	ActualizacionGlobal();	
 
-
-	/*
-	
 	for(int i = 0; i < mapa_aux.size(); i++){
-		cout << i << endl;
 		for(int j = 0; j < mapa_aux.size(); j++){
-			cout << j << endl; 
-			cout << mapa_aux.at(i).at(j)<< " ";
+			cout << mapa_aux.at(i).at(j);
 		}
-		cout << endl;
+		cout << endl; 
 	}
-
-	*/
-	
-	
-	/*
-	for(int i = 0; i< mapa_aux.size(); i++){
-		for(int j = 0; j < mapa_aux.size(); j++){
-			cout << setw(3) << mapa_recorrido.at(i).at(j).bateria<< " ";
-		}
-		cout << endl;
-	}
-	*/
 
 	bool entra = false; 
-	bool no_mover = false;
+	bool primero = false;
+	bool no_mover = true;
 
 	if((sensores.terreno.at(2) != 'M' and sensores.terreno.at(2) != 'P') and sensores.agentes.at(2) == '_' ){
 		 
@@ -1635,7 +1156,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 			
 			
 			accion = Movimiento(v,current_state,mapa_aux.at(current_state.target.fil).at(current_state.target.col)); 
-			entra = true; 
+			primero = true; 
 			if(accion == actIDLE){
 				no_mover = true;
 			}else{
@@ -1648,7 +1169,19 @@ Action ComportamientoJugador::think(Sensores sensores){
 	}
 
 	int i = 0;
-	while(i <16 and !entra and !no_mover){
+	while(i <16){
+		unsigned char c = sensores.terreno.at(i);
+		if(c == 'X'){
+			point p = CalculaPunto(current_state.p_virtual,current_state.brujula_virtual,i);
+			mapa_recorrido.at(p.fil).at(p.col).bateria = 0; 
+			Por_actualizar.at(0).push(CalculaPunto(current_state.p_virtual,current_state.brujula_virtual,i));
+			cont_bateria++;
+		}
+		i++;
+	}
+
+	i = 0;
+	while(i <16 and !entra and no_mover){
 		unsigned char c = sensores.terreno.at(i);
 		if(c == 'G' and !current_state.condiciones.bien_ubicado){
 			accion = Movimiento(sensores.terreno,current_state,'G');
@@ -1668,35 +1201,21 @@ Action ComportamientoJugador::think(Sensores sensores){
 			current_state.condiciones.investiga = false;
 			current_state.target = CalculaPunto(current_state.p_virtual,current_state.brujula_virtual,i);
 
-		}else if(c == 'X'){
-			point p = CalculaPunto(current_state.p_virtual,current_state.brujula_virtual,i);
-			mapa_recorrido.at(p.fil).at(p.col).bateria = 0; 
-			Por_actualizar.at(0).push(CalculaPunto(current_state.p_virtual,current_state.brujula_virtual,i));
-			cont_bateria++;
 		}
 		i++;
 	}
 
-	if(entra){
-		cout << "entra:true" << endl; 
-	}else{
-		cout << "entra:false" << endl; 
-	}
-
-	if(no_mover){
-		cout << "no_mover:true" << endl; 
-	}else{
-		cout << "no_mover:false" << endl; 
-	}
-
 	
 
-	if(accion == actIDLE){
-		entra = false;
-		current_state.target = point(-1,-1); 
+	if(entra or primero){
+		if(accion == actIDLE){
+			entra = false;
+			primero = false;
+			current_state.target = point(-1,-1); 
+		}
 	}
 
-	if(!entra){
+	if(!entra and !primero){
 		vector<point> v; 
 		point p;
 		vector<bool> disponible;
@@ -1704,31 +1223,70 @@ Action ComportamientoJugador::think(Sensores sensores){
 			disponible.push_back(true);
 		}
 		unsigned char c; 
+
+		if(sensores.agentes.at(2) != '_' or  sensores.agentes.at(6) != '_' or sensores.agentes.at(12) != '_'){
+			disponible.at(0) = disponible.at(8) = false; 
+			no_agentes.at(0) = no_agentes.at(8) = false;
+
+		}
+		if(sensores.agentes.at(1) != '_' or  sensores.agentes.at(4) != '_' or sensores.agentes.at(9) != '_'){
+			disponible.at(7) = disponible.at(15) = false; 
+			no_agentes.at(7) = no_agentes.at(15) = false;
+			
+		}
+		if(sensores.agentes.at(3) != '_' or  sensores.agentes.at(8) != '_' or sensores.agentes.at(15) != '_'){
+			disponible.at(1) = disponible.at(9) = false; 
+			no_agentes.at(1) = no_agentes.at(9) = false;
+			
+		}
+		if(sensores.agentes.at(11) == 'l' or  sensores.agentes.at(13) == 'l'){
+			disponible.at(8) = false; 
+			no_agentes.at(8) = false;
+			
+		}
+		if(sensores.agentes.at(5) == 'l' or  sensores.agentes.at(7) == 'l'){
+			disponible.at(0) = disponible.at(8) = false; 
+			no_agentes.at(0) = no_agentes.at(8) = false;
+			disponible.at(1) = disponible.at(9) = false; 
+			no_agentes.at(1) = no_agentes.at(9) = false;
+			disponible.at(7) = disponible.at(15) = false; 
+			no_agentes.at(7) = no_agentes.at(15) = false;
+		}
+		if(sensores.agentes.at(10) == 'l'){
+			disponible.at(15) = false; 
+			no_agentes.at(15) = false;
+			
+		}
+		if(sensores.agentes.at(14) == 'l' ){
+			disponible.at(9) = false; 
+			no_agentes.at(9) = false;
+			
+		}
+		if(sensores.agentes.at(3) == 'l' ){
+			disponible.at(0)  = false; 
+			no_agentes.at(0) = false;
+			
+		}
+		if(sensores.agentes.at(1) == 'l' ){
+			disponible.at(0) = false; 
+			no_agentes.at(0)  = false;
+			
+		}
+
 		
 		for(int i = 0; i < 8; i++){
 			p = current_state.p_virtual;
 			Actualizar(p,static_cast<Orientacion>((current_state.brujula_virtual + i)%8), 1);
 			v.push_back(p);
 			c = mapa_aux.at(v.at(i).fil).at(v.at(i).col);
+			cout << current_state.brujula_virtual << endl; 
+			cout << static_cast<Orientacion>((current_state.brujula_virtual + i)%8) << endl; 
+			cout << current_state.p_virtual.to_s() << endl;
+			cout << p.to_s() << endl; 
+
+			cout << c << endl; 
 			if( c == 'M' or c == 'P'){
-				cout << "no valido: " << i << "," << i+8 << endl;
 				disponible.at(i) = disponible.at(i + 8) = false;
-
-			}else{
-				if(i == 0){
-					if(sensores.agentes.at(2) != '_'){
-						disponible.at(i) = disponible.at(i + 8) = false; 
-					}
-				}else if( i == 7){
-					if(sensores.agentes.at(1) != '_'){
-						disponible.at(i) = disponible.at(i + 8) = false;
-					}
-
-				}else if( i == 1){
-					if(sensores.agentes.at(3) != '_'){
-						disponible.at(i) = disponible.at(i + 8) = false;
-					}
-				}
 			}
 		}
 		
@@ -1739,26 +1297,18 @@ Action ComportamientoJugador::think(Sensores sensores){
 			c = mapa_aux.at(v.at(i).fil).at(v.at(i).col);
 			if( c == 'M' or c == 'P'){
 				disponible.at(i) = false;
-			}else{
-
-				if(i == 8){
-					if(sensores.agentes.at(6) != '_'){
-						disponible.at(i) = false; 
-					}
-				}else if( i == 15){
-					if(sensores.agentes.at(4) != '_'){
-						disponible.at(i) =  false;
-					}
-
-				}else if( i == 9){
-					if(sensores.agentes.at(8) != '_'){
-						disponible.at(i) = false;
-					}
-				}
 			}
 
 			if(sensores.nivel == 3 and c == '?'){
 				disponible.at(i) = false;
+			}
+		}
+
+		for(int i = 0; i < 16; i++){
+			if(disponible.at(i)){
+				cout << "true" << endl; 
+			}else{
+				cout << "false" << endl; 
 			}
 		}
 
@@ -1767,59 +1317,16 @@ Action ComportamientoJugador::think(Sensores sensores){
 		double valor = 0;
 		double bateria = 0;
 		double explora = 0;
-		
-		
 
-		for(int i = 0; i < 16; i++){
-			
-			if(disponible.at(i)){
+		int entradas_bucle = 0; 
+		int entradas_huida = 0;
 
-				bateria = CosteManiobra(i%8);
-				bateria += CosteMedioCasilla(mapa_aux.at(v.at(i).fil).at(v.at(i).col));
-
-				if(i >= 8){
-					bateria += CBateria(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col),1,0);
-				
-
-				}else{
-					bateria += CBateria(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col),0,0);
-					bateria += CBateria(mapa_aux.at(v.at(i).fil).at(v.at(i).col),0,0);
-
-				}
-
-				explora = Explorara(v.at(i), static_cast<Orientacion>((current_state.brujula_virtual + i)%8), sensores);
-
-				if(bateria > 400){
-					valor = 0;
-				}else{
-					bateria = (1 - bateria/400);
-					explora = (explora/19);
-					valor = pow(bateria,2) + pow(explora,2);
-				}
-
-				if(frecuencias.at(v.at(i).fil).at(v.at(i).col) > 50 ){
-					valor = 0;
-				}else{
-					double disminuir = 1 - (1.0*frecuencias.at(v.at(i).fil).at(v.at(i).col))/50;
-					valor = valor*(disminuir);
-				}
-
-				
-				
-				if(valor > max ){
-					max = valor;
-					index = i; 
-				}
-
-				cout << index << endl;
-
-			}
-		}
 
 		if(cont_bateria > 0 and current_state.condiciones.bateria){
+			max = 0;
 			for(int i = 0; i < 16; i++){
 			
-				if(disponible.at(i)){
+				if(disponible.at(i) and no_agentes.at(i)){
 
 					bateria = CosteManiobra(i%8);
 					bateria += CosteMedioCasilla(mapa_aux.at(v.at(i).fil).at(v.at(i).col));
@@ -1833,6 +1340,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 						bateria += CBateria(mapa_aux.at(v.at(i).fil).at(v.at(i).col),0,0);
 
 					}
+
 					if(mapa_recorrido.at(v.at(i).fil).at(v.at(i).col).bateria != -1){
 						explora = mapa_recorrido.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).bateria + 2; 
 						explora = explora - mapa_recorrido.at(v.at(i).fil).at(v.at(i).col).bateria; 
@@ -1843,8 +1351,6 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 					
 
-					 
-
 					if(bateria > 400){
 						valor = 0;
 					}else{
@@ -1852,8 +1358,6 @@ Action ComportamientoJugador::think(Sensores sensores){
 						explora = (explora/5); 
 						valor = pow(bateria,2) + pow(explora,2);
 					}
-
-					cout << "bateria: " << valor << " indice: " << index ; 
 					
 					
 					if(valor > max ){
@@ -1861,387 +1365,101 @@ Action ComportamientoJugador::think(Sensores sensores){
 						index = i; 
 					}
 
-					cout << index << endl;
-
 				}
 			}
-		}
-	
-
-
-		if(index == 0){
-			accion = actWALK;
-		}else if (index == 8){
-			accion = actRUN;
 		}else{
-			accion = CambiaDir(current_state.brujula_virtual, (current_state.brujula_virtual + index)%8 );
-		}
-	}
 
-	
-
-
-	
-	
-	
-
-	/*
-	if(current_state.brujula_virtual != static_cast<Orientacion>(current_state.way)){
-		current_state.way = -1;
-	}
-	
-
-	if(current_state.way != -1 and current_state.brujula_virtual != static_cast<Orientacion>(current_state.way) ){
-		accion = CambiaDir(current_state.brujula_virtual, static_cast<Orientacion>(current_state.way));
-
-	}else if(current_state.condiciones.atrapado_muros){
-
-		if(current_state.condiciones.salida_muros == true){
-			current_state.condiciones.salida_muros = false; 
-			current_state.condiciones.atrapado_muros = false;
-		}
-		
-
-		if(false){
-
-			Orientacion way = PorExplorar(mapa_aux, '?');
-			current_state.condiciones.investiga = true; 
-			current_state.condiciones.salida_muros = false; 
-			current_state.condiciones.atrapado_muros = false;
-			current_state.way = way;
-			accion = CambiaDir(current_state.brujula_virtual,way);
-
-
-		}else if(sensores.terreno.at(2) == 'M' or sensores.terreno.at(2) == 'P' or sensores.agentes.at(2) != '_'){
-			accion = actTURN_L;
-		}else if(sensores.terreno.at(3) != 'M' and sensores.terreno.at(3) != 'P') {
-			accion = actTURN_SR;
-			current_state.condiciones.salida_muros = true;
-		}else{
-			accion = actWALK;
-		}
-
-
-
-		
-	}else if(sensores.terreno.at(2) == 'M' or sensores.terreno.at(2) == 'P' or sensores.agentes.at(2) != '_'){
-		
-		if(current_state.target.fil != -1){
-			int i = 1; 
-			while(i < 4){
-				if(sensores.terreno.at(i) == 'M' or sensores.terreno.at(i) == 'P' or sensores.agentes.at(i) != '_')
-				i++;
-			}
-			if( i != 4){
-				
-			}
+			for(int i = 0; i < 16; i++){
 			
-		}
-		orientacion_deseada = current_state.brujula_virtual; 
-		
-		if(current_state.brujula_virtual%2 == 0){
-			accion = actTURN_L;
-		}else{
-			accion = actTURN_SR;
-		}
-		if(current_state.condiciones.investiga){
-			current_state.condiciones.atrapado_muros = true; 
-			current_state.condiciones.investiga = false;
-		}
+				if(disponible.at(i)){
 
-		current_state.target = point(-1,-1);
-		
-		
+					entradas_bucle++;
 
-	}else if((sensores.terreno.at(2) != 'M' and sensores.terreno.at(2) != 'P') and sensores.agentes.at(2) == '_' ){
-		 
-		if(current_state.target.fil != -1){
-			cout << "entra arriba" << endl; 
-			accion = Movimiento(sensores.terreno,current_state,mapa_aux.at(current_state.target.fil).at(current_state.target.col)); 
-			
-		}else if(current_state.condiciones.bateria and cont_bateria > 0){
+					bateria = CosteManiobra(i%8);
+					bateria += CosteMedioCasilla(mapa_aux.at(v.at(i).fil).at(v.at(i).col));
 
-			point p = current_state.p_virtual;
-			cout << "entra" << endl; 
-			if(mapa_recorrido.at(p.fil).at(p.col).bateria == 0){
-				accion = actIDLE;
-			}else{
+					if(i >= 8){
+						bateria += CBateria(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col),1,0);
+					
 
-				Actualizar(p.fil,p.col,current_state.brujula_virtual,1);
-				if(mapa_recorrido.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).bateria > mapa_recorrido.at(p.fil).at(p.col).bateria){
-					accion = actWALK;
-				}else{
-					p = current_state.p_virtual;
-					int i = 0; 
-					int dis = mapa_recorrido.at(p.fil).at(p.col).bateria;
-					int min = dis; 
-					while (dis <= min and i < 8 ){
-						p = current_state.p_virtual;
+					}else{
+						bateria += CBateria(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col),0,0);
+						bateria += CBateria(mapa_aux.at(v.at(i).fil).at(v.at(i).col),0,0);
 
-						Actualizar(p.fil,p.col,static_cast<Orientacion>(i),1);
+					}
 
-						if(mapa_recorrido.at(p.fil).at(p.col).bateria >= 0 ){
-							min = mapa_recorrido.at(p.fil).at(p.col).bateria;
+					explora = Explorara(v.at(i), static_cast<Orientacion>((current_state.brujula_virtual + i)%8), sensores);
+					point p_aux_1 = v.at(i);
+					point p_aux_2 = v.at(i);
+					Actualizar(p_aux_2, static_cast<Orientacion>((current_state.brujula_virtual + i)%8),2);
+					Actualizar(p_aux_1, static_cast<Orientacion>((current_state.brujula_virtual + i)%8),1);
+
+					unsigned char aux_1 = mapa_aux.at(p_aux_1.fil).at(p_aux_1.col);
+					unsigned char aux_2 = mapa_aux.at(p_aux_2.fil).at(p_aux_2.col);
+					if(aux_1 != 'P' and aux_1 != 'M' and aux_2 != 'P' and aux_2 != 'M'){
+						explora += Explorara(p_aux_2, static_cast<Orientacion>((current_state.brujula_virtual + i)%8), sensores);
+					}
+					
+					if(sensores.nivel == 3){
+						if(explora > 6){
+							huida = false;
+						}
+					}else{
+						if(explora > 8){
+							huida = false;
+						}
+
+					}
+					
+					
+
+					if(bateria > 400){
+						valor = 0;
+					}else{
+						bateria = (1 - bateria/400);
+						if(sensores.nivel == 3){
+							explora = (explora/27);
+						}else{
+							explora = (explora/36);
 						}
 						
-						i++;
+						valor = pow(bateria,2) + pow(explora,2);
 					}
 
-					i--;
-					 
-					accion = CambiaDir(current_state.brujula_virtual,i);
-				}
-				
-			}
-
-		}else{
-			bool entra = false; 
-			int i = 0;
-			while(i <16 and !entra){
-				unsigned char c = sensores.terreno.at(i);
-				if(c == 'G' and !current_state.condiciones.bien_ubicado){
-					accion = Movimiento(sensores.terreno,current_state,'G');
-					entra = true; 
-					current_state.condiciones.investiga = false; 
-					current_state.target = CalculaPunto(current_state.p_virtual,current_state.brujula_virtual,i);
-
-				}else if (c == 'D' and !current_state.condiciones.zapatillas){
-					accion = Movimiento(sensores.terreno,current_state,'D');
-					entra = true; 
-					current_state.condiciones.investiga = false; 
-					current_state.target = CalculaPunto(current_state.p_virtual,current_state.brujula_virtual,i);
-
-				}else if(c == 'K' and !current_state.condiciones.bikini) {
-					accion = Movimiento(sensores.terreno,current_state,'K');
-					entra = true; 
-					current_state.condiciones.investiga = false;
-					current_state.target = CalculaPunto(current_state.p_virtual,current_state.brujula_virtual,i);
-
-				}else if(c == 'X'){
-					point p = CalculaPunto(current_state.p_virtual,current_state.brujula_virtual,i);
-					mapa_recorrido.at(p.fil).at(p.col).bateria = 0; 
-					Por_actualizar.at(0).push(CalculaPunto(current_state.p_virtual,current_state.brujula_virtual,i));
-					cont_bateria++;
-				}
-				i++;
-			}
-			if(!entra){
-				/*
-				if(!current_state.condiciones.investiga and rand()%7 == 0){
-					
-					Orientacion way = PorExplorar(mapa_aux, '?');
-
-					if(way != current_state.brujula_virtual){
-						accion = actWALK;
+					if(explora == 0){
+						entradas_huida++;
 					}
 
-					current_state.condiciones.investiga = true; 
-					current_state.way = way;
-					accion = CambiaDir(current_state.brujula_virtual,way);
 					
 
-				}else 
-				
-				if(current_state.condiciones.investiga) {
-					point frente = current_state.p_virtual;
+					double disminuir = 0;
 
-					if(sensores.nivel == 3 ){
-						Actualizar(frente, current_state.brujula_virtual, 2);
+					if(frecuencias.at(v.at(i).fil).at(v.at(i).col) > 40 ){
+						valor = 0;
 					}else{
-						Actualizar(frente, current_state.brujula_virtual,4);
+						disminuir = 1 - (1.0*frecuencias.at(v.at(i).fil).at(v.at(i).col))/40;
+						valor = valor*(disminuir);
 					}
-
-					if(mapa_aux.at(frente.fil).at(frente.col) == '?'){
-						current_state.condiciones.investiga = false; 
-					}
-
-					accion = Andar_Correr(sensores.agentes);
-
-
-
-				}else {
-					point frente = current_state.p_virtual;
-
-					if(sensores.nivel == 3 ){
-						Actualizar(frente, current_state.brujula_virtual, 2);
-					}else{
-						Actualizar(frente, current_state.brujula_virtual,4);
-					}
-
 					
-					if(mapa_aux.at(frente.fil).at(frente.col) == '?' ){
-						accion = Andar_Correr(sensores.agentes);
-					}else{
-						point p = Mas_Cercana(); 
-						if(p != point(-1,-1)){
-
-							Action act= CambiaDir(current_state.brujula_virtual,CalOrientacion(current_state.p_virtual, p));  
-							if(act == actIDLE){
-								accion = actWALK;
-							}else{
-								accion = act;
-							} 
-
-						}else{
-							
-							Orientacion way = PorExplorar(mapa_aux, '?');
-
-							if(way != current_state.brujula_virtual){
-								accion = actWALK;
-							}
-
-							current_state.condiciones.investiga = true; 
-							current_state.way = way;
-							accion = CambiaDir(current_state.brujula_virtual,way);
-									
-						}
-					}
-				}
-				
-			}
-		}
-		
-	}
-	
-	/*
-	point frente = current_state.p_virtual;
-
-	if(sensores.nivel != 3 ){
-		Actualizar(frente, current_state.brujula_virtual, 2);
-	}else{
-		Actualizar(frente, current_state.brujula_virtual,4);
-	}
-
-	if(mapa_aux.at(frente.fil).at(frente.col) == '?'){
-		accion = Andar_Correr(sensores.agentes);
-	}else{
-		point p = Mas_Cercana(); 
-		if(p == point(-1,-1)){
-			current_state.target = p;
-		}else{
-			
-			Orientacion way = PorExplorar(mapa_aux, '?');
-
-			if(way != current_state.brujula_virtual){
-				accion = actWALK;
-			}
-
-			current_state.condiciones.investiga = true; 
-			current_state.way = way;
-			accion = CambiaDir(current_state.brujula_virtual,way);
 					
-		}
-	}
-	*/
+					if(valor > max ){
+						max = valor;
+						index = i; 
+					}
 
-
-
-	
-
-	/*
-
-
-
-	if(current_state.brujula_virtual != static_cast<Orientacion>(current_state.way)){
-		current_state.way = -1;
-	}
-	
-
-	if(current_state.way != -1 and current_state.brujula_virtual != static_cast<Orientacion>(current_state.way) ){
-		accion = CambiaDir(current_state.brujula_virtual, static_cast<Orientacion>(current_state.way));
-	}else if(sensores.terreno.at(2) == 'M' or sensores.terreno.at(2) == 'P' or sensores.agentes.at(2) != '_'){
-		
-		if(he_acabado){
-			point p = Hay_cerca();
-			if( p == point(-1,-1)){
-				orientacion_deseada = current_state.brujula_virtual;
-
-				origen_huida = BuscarZonaIdonea();
-
-				Por_actualizar.at(3).push(origen_huida);
-				ActualizacionGlobal();
-			}else{
-				//Buscar puntos no explorados cercanos.
+				}
 			}
-			
-		}else{
-			//Buscar lo el punto mas cercano sin peligro, evitar lobos, sortear obstaculos, etc..
 
-		}
+			if(entradas_huida == entradas_bucle and !huida){
+				huida = true;
+				ReseteoHuida();
+				max = 0;
 
-	}else{
-		if(current_state.condiciones.investiga) {
+			}
 
-			if(he_acabado){
-
-				point frente = current_state.p_virtual;
-
-				if(sensores.nivel == 3 ){
-					Actualizar(frente, current_state.brujula_virtual, 2);
-				}else{
-					Actualizar(frente, current_state.brujula_virtual,4);
-				}
-
-				if(mapa_aux.at(frente.fil).at(frente.col) == '?'){
-					current_state.condiciones.investiga = false; 
-				}
-
-				accion = Andar_Correr(sensores.agentes);
-
-			}else{
-				vector<point> v; 
-				point p;
-				vector<bool> disponible;
+			if(huida){
 				for(int i = 0; i < 16; i++){
-					disponible.push_back(true);
-				}
-				unsigned char c; 
-				for(int i = 0; i < 8; i++){
-					p = current_state.p_virtual;
-					Actualizar(p,(current_state.brujula_virtual + i)%8, 1);
-					v.push_back(p);
-					c = mapa_aux.at(v.at(i).fil).at(v.at(i).col);
-					if( c == 'M' or c == 'P'){
-						disponible.at(i) = disponible.at(i + 8) = false;
-
-					}else{
-						if(i == 0){
-							if(sensores.agentes.at(2) != '_'){
-								disponible.at(i) = false; 
-							}
-						}else if( i == 7){
-							if(sensores.agentes.at(1) == '_'){
-								disponible.at(i) = false;
-							}
-
-						}else if( i == 1){
-							if(sensores.agentes.at(3) == '_'){
-								disponible.at(i) = false;
-							}
-						}
-					}
-				}
-				for(int i = 8; i < 16; i++){
-					p = current_state.p_virtual;
-					Actualizar(p,(current_state.brujula_virtual + i)%8, 2);
-					v.push_back(p);
-					c = mapa_aux.at(v.at(i).fil).at(v.at(i).col);
-					if( c == 'M' or c == 'P'){
-						disponible.at(i) = false;
-
-					}
-				}
-
-				int max = 0;
-				int index = -1;
-				double valor = 0;
-				double bateria = 0;
-				double explora = 0;
 				
-				
-
-				for(int i = 0; i < 16; i++){
-					
 					if(disponible.at(i)){
 
 						bateria = CosteManiobra(i%8);
@@ -2257,14 +1475,24 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 						}
 
-						explora = Explorara(v.at(i), static_cast<Orientacion>((current_state.brujula_virtual + i)%8), sensores);
+						explora = ExploraHuida(current_state.p_virtual,v.at(i));
 
-						bateria = (1 - bateria/322);
-						explora = (explora/16);
+						if(bateria > 400){
+							valor = 0;
+						}else{
+							bateria = (1 - bateria/400);
+							valor = pow(bateria,2) + pow(explora,2);
+						}
 
-						valor = pow(bateria,2) + pow(explora,2);
-
-						if(valor > max){
+						if(frecuencias.at(v.at(i).fil).at(v.at(i).col) > 40){
+							valor = 0;
+						}else{
+							double disminuir = 1 - (1.0*frecuencias.at(v.at(i).fil).at(v.at(i).col))/40;
+							valor = valor*(disminuir);
+						}
+						
+						
+						if(valor > max ){
 							max = valor;
 							index = i; 
 						}
@@ -2272,86 +1500,18 @@ Action ComportamientoJugador::think(Sensores sensores){
 					}
 				}
 
-
-				if(index == 0){
-					accion = actWALK;
-				}else if (index == 8){
-					accion = actRUN;
-				}else{
-					accion = CambiaDir(current_state.brujula_virtual, (current_state.brujula_virtual + index)%8 );
-				}
-
-
-
-
-				
-
-				
-				
-
-				
 			}
 
-			
-
-
-
-		}else {
-			point frente = current_state.p_virtual;
-
-			if(sensores.nivel == 3 ){
-				Actualizar(frente, current_state.brujula_virtual, 2);
-			}else{
-				Actualizar(frente, current_state.brujula_virtual,4);
-			}
-
-			
-			if(mapa_aux.at(frente.fil).at(frente.col) == '?' ){
-				accion = Andar_Correr(sensores.agentes);
-			}else{
-				point p = Mas_Cercana(); 
-				if(p != point(-1,-1)){
-
-					Action act= CambiaDir(current_state.brujula_virtual,CalOrientacion(current_state.p_virtual, p));  
-					if(act == actIDLE){
-						accion = actWALK;
-					}else{
-						accion = act;
-					} 
-
-				}else{
-					
-					Orientacion way = PorExplorar(mapa_aux, '?');
-
-					if(way != current_state.brujula_virtual){
-						accion = actWALK;
-					}
-
-					current_state.condiciones.investiga = true; 
-					current_state.way = way;
-					accion = CambiaDir(current_state.brujula_virtual,way);
-							
-				}
-			}
 		}
-	
+
+		if(index == 0){
+			accion = actWALK;
+		}else if (index == 8){
+			accion = actRUN;
+		}else{
+			accion = CambiaDir(current_state.brujula_virtual, (current_state.brujula_virtual + index)%8 );
+		}
 	}
-
-
-	
-
-
-
-	
-		
-	*/
-	/*
-	//Gestion de muros:
-	
-	if((sensores.terreno.at(2) == 'M' or sensores.terreno.at(2) == 'P') and sensores.agentes.at(2) != '_' ){
-		
-	}
-	*/
 
 		last_action = accion;
 	
