@@ -4,11 +4,7 @@
 #include<math.h>
 #include<set>
 #include<tgmath.h>
-#include<list>
-#include<stack>
 #include <utility>
-#include <chrono>
-#include <thread>
 #include<iomanip>
 
 using namespace std;
@@ -799,27 +795,44 @@ void ComportamientoJugador::ActulizarMapa(vector<vector<unsigned char>> &mapa_vi
 
 int ComportamientoJugador::CosteManiobra(int i){
 	int coste = CBateria(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col),0,1);
-
+	const int CONST_GIRO = 10;
+	int agregado = 0; 
 	switch(i){
 		case 0:
 			coste = 0; 
 			break;
-		case 1:
 		case 6:
-			coste = coste + 10;
+			if(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col) == 'B' and !current_state.condiciones.zapatillas){
+				agregado = agregado + 10;
+			}
+		case 1:
+			coste = coste + CONST_GIRO;
+			
 			break;
+		case 4:
+			if(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col) == 'B' and !current_state.condiciones.zapatillas){
+				agregado = agregado + 10; 
+			}
+		case 7: 
+			if(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col) == 'B' and !current_state.condiciones.zapatillas){
+				agregado = agregado + 10;
+			}
 		case 2:
-		case 4: 
-		case 7:
-			coste = 2*coste + 20;
+			coste = 2*coste + 2*CONST_GIRO;
 			break;
-		case 3:
 		case 5:
-			coste = 3*coste + 30;
+			if(mapa_aux.at(current_state.p_virtual.fil).at(current_state.p_virtual.col) == 'B' and !current_state.condiciones.zapatillas){
+				agregado = agregado + 20;
+			}
+		case 3:
+			coste = 3*coste + 3*CONST_GIRO;
 			break;
 		default:
+			coste = 0;
 			break; 
 	}
+
+	coste = coste + agregado; 
 
 	return coste;
 
@@ -897,10 +910,13 @@ void ComportamientoJugador::ExtraeTerreno(const point &p, Orientacion ori, const
 
 point ComportamientoJugador::casillaHuida(){
 	
-	point p = point(3,3);
+	point p = point(-1,-1);
 	point pivote = point(0,0);
-	int suma; 
-	int max = 0;
+	double suma = 0; 
+	double max = 0;
+	bool entrar = false; 
+	double multiplicador = 0; 
+	const int CONST_MULT = 60;
 
 	for(int i = 0; i < mapa_aux.size(); i++){
 		for(int j = 0; j < mapa_aux.size(); j++){
@@ -915,11 +931,34 @@ point ComportamientoJugador::casillaHuida(){
 				}
 				*/
 
-				for(int k = -3; k < 4; k++){
-					for(int l = -3; l < 4; l++){
-						suma += mapa_recorrido.at((i+k + 4*tam)%tam).at((j + l + 4*tam)%tam).hijos;
+				entrar = false; 
+
+				for(int k = -1; k < 2 and !entrar; k++){
+					for(int l = -1; l < 2 and !entrar; l++){
+						if(mapa_aux.at((i+k + 4*tam)%tam).at((j + l + 4*tam)%tam) == '?'){
+							entrar = true;
+						}
 					}
 				}
+
+				if(entrar){
+					for(int k = -3; k < 4; k++){
+						for(int l = -3; l < 4; l++){
+							suma += mapa_recorrido.at((i+k + 4*tam)%tam).at((j + l + 4*tam)%tam).hijos;
+						}
+					}
+					multiplicador = current_state.p_virtual.dis(point(i,j),tam); 
+
+					if(multiplicador > CONST_MULT){
+						multiplicador = 1; 
+					}else{
+						multiplicador = 2 - multiplicador/CONST_MULT;
+					}
+
+					suma *= multiplicador; 
+					
+				}
+
 
 				if( suma > max ){
 					p = point(i,j);
@@ -927,6 +966,12 @@ point ComportamientoJugador::casillaHuida(){
 				}
 			}
 		}
+	}
+
+	if(p == point(-1,-1)){
+		cout << " ⛏💎⛏💎⛏💎⛏💎⛏💎 He acabado ⛏💎⛏💎⛏💎⛏💎⛏💎 " << endl; 
+		mapa_100 = true;
+		p = point(3,3);
 	}
 
 	return p;
@@ -974,7 +1019,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	Action accion = actIDLE;
 	
-
+	/*
 	// Mostrar el valor de los sensores
 	cout << "Posicion: fila " << sensores.posF << " columna " << sensores.posC;
 	switch (sensores.sentido)
@@ -999,12 +1044,14 @@ Action ComportamientoJugador::think(Sensores sensores){
 	cout << "\nColision: " << sensores.colision;
 	cout << "  Reset: " << sensores.reset;
 	cout << "  Vida: " << sensores.vida << endl<< endl;
+	*/
 
 	
 
 	//std::this_thread::sleep_for(std::chrono::seconds(3));
 
 	//Modificar variables
+
 	if(sensores.colision == false){
 		vector<bool> aux_bool;
 		switch (last_action)
@@ -1062,6 +1109,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	if(sensores.reset == true){
 		init();
+
 	}
 	if(sensores.nivel == 0 and !current_state.condiciones.bien_ubicado){
 		current_state.condiciones.bien_ubicado = true;
@@ -1086,10 +1134,11 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	}
 
-	if(accion_vacia > 8){
+	if(accion_vacia > 6){
 		for(int i = 0; i < 16; i++){
         	no_agentes.at(i) = true;
       	}
+		accion_vacia = 0; 
 	}
 
 
@@ -1113,7 +1162,14 @@ Action ComportamientoJugador::think(Sensores sensores){
 		current_state.brujula_virtual = current_state.brujula_real;
 		mapa_aux = vector<vector<unsigned char>>(mapaResultado);
 		current_state.target = point(-1,-1);
-		cont_bateria = bateria_anterior;
+		cont_bateria = 0;
+		for(int i = 0; i < mapa_aux.size(); i++){
+			for(int j = 0; j < mapa_aux.size(); j++){
+				if(mapa_aux.at(i).at(j) == 'X'){
+					cont_bateria++;
+				} 
+			}
+		}
 
 	}else if (sensores.terreno.at(0) == 'D' and !current_state.condiciones.zapatillas ){
 		current_state.condiciones.zapatillas = true;
@@ -1144,6 +1200,12 @@ Action ComportamientoJugador::think(Sensores sensores){
 	
 	if (current_state.condiciones.bien_ubicado){
 		PonerTerrenoEnMatriz(sensores.terreno,current_state,mapaResultado,false);
+	}
+
+	if(mapa_100){
+		cout << " ⛏💎⛏💎⛏💎⛏💎⛏💎 He acabado ⛏💎⛏💎⛏💎⛏💎⛏💎 " << endl; 
+		last_action = actIDLE;
+		return actIDLE;
 	}
 
 	ActualizacionGlobal();	
@@ -1219,6 +1281,14 @@ Action ComportamientoJugador::think(Sensores sensores){
 			current_state.target = point(-1,-1); 
 		}
 	}
+	/*
+	for(int i = 0; i < mapaResultado.size(); i++){
+		for(int j = 0; j< mapaResultado.size(); j++){
+			cout << mapa_aux.at(i).at(j);
+		}
+		cout << endl; 
+	}
+	*/
 
 	if(!entra and !primero){
 		vector<point> v; 
@@ -1227,26 +1297,57 @@ Action ComportamientoJugador::think(Sensores sensores){
 		for(int i = 0; i < 16; i++){
 			disponible.push_back(true);
 		}
-		unsigned char c; 
+		unsigned char c;
 
-		if(sensores.agentes.at(2) != '_' or  sensores.agentes.at(6) != '_' or sensores.agentes.at(12) != '_'){
+		if(sensores.agentes.at(2) == 'a' ){
 			disponible.at(0) = disponible.at(8) = false; 
 			no_agentes.at(0) = no_agentes.at(8) = false;
 
 		}
-		if(sensores.agentes.at(1) != '_' or  sensores.agentes.at(4) != '_' or sensores.agentes.at(9) != '_'){
+		if(sensores.agentes.at(1) == 'a' ){
 			disponible.at(7) = disponible.at(15) = false; 
 			no_agentes.at(7) = no_agentes.at(15) = false;
 			
 		}
-		if(sensores.agentes.at(3) != '_' or  sensores.agentes.at(8) != '_' or sensores.agentes.at(15) != '_'){
+		if(sensores.agentes.at(3) == 'a'){
+			disponible.at(1) = disponible.at(9) = false; 
+			no_agentes.at(1) = no_agentes.at(9) = false;
+			
+		}
+
+		if(sensores.agentes.at(8) == 'a'){
+			disponible.at(9) = false; 
+			no_agentes.at(9) = false;
+		}
+
+		if( sensores.agentes.at(4) == 'a'){
+			disponible.at(15) = false; 
+			no_agentes.at(15) = false;
+		}
+
+		if(sensores.agentes.at(6) == 'a'){
+			disponible.at(8) = false; 
+			no_agentes.at(8) = false;
+		}
+
+		if(sensores.agentes.at(2) == 'l' or  sensores.agentes.at(6) == 'l' or sensores.agentes.at(12) == 'l'){
+			disponible.at(0) = disponible.at(8) = false; 
+			no_agentes.at(0) = no_agentes.at(8) = false;
+
+		}
+		if(sensores.agentes.at(1) == 'l' or  sensores.agentes.at(4) == 'l' or sensores.agentes.at(9) == 'l'){
+			disponible.at(7) = disponible.at(15) = false; 
+			no_agentes.at(7) = no_agentes.at(15) = false;
+			
+		}
+		if(sensores.agentes.at(3) == 'l' or  sensores.agentes.at(8) == 'l' or sensores.agentes.at(15) == 'l'){
 			disponible.at(1) = disponible.at(9) = false; 
 			no_agentes.at(1) = no_agentes.at(9) = false;
 			
 		}
 		if(sensores.agentes.at(11) == 'l' or  sensores.agentes.at(13) == 'l'){
-			disponible.at(8) = false; 
-			no_agentes.at(8) = false;
+			disponible.at(0) = disponible.at(8) = false; 
+			no_agentes.at(0) = no_agentes.at(8) = false;
 			
 		}
 		if(sensores.agentes.at(5) == 'l' or  sensores.agentes.at(7) == 'l'){
@@ -1278,7 +1379,6 @@ Action ComportamientoJugador::think(Sensores sensores){
 			
 		}
 
-		
 		for(int i = 0; i < 8; i++){
 			p = current_state.p_virtual;
 			Actualizar(p,static_cast<Orientacion>((current_state.brujula_virtual + i)%8), 1);
@@ -1288,6 +1388,8 @@ Action ComportamientoJugador::think(Sensores sensores){
 				disponible.at(i) = disponible.at(i + 8) = false;
 			}
 		}
+
+		
 		
 		for(int i = 8; i < 16; i++){
 			p = current_state.p_virtual;
@@ -1303,13 +1405,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 			}
 		}
 
-		for(int i = 0; i < 16; i++){
-			if(disponible.at(i) and no_agentes.at(i)){
-				cout << "true" << endl; 
-			}else{
-				cout << false << endl; 
-			}
-		}
+		
 
 		double max = 0;
 		int index = -1;
@@ -1320,8 +1416,12 @@ Action ComportamientoJugador::think(Sensores sensores){
 		int entradas_bucle = 0; 
 		int entradas_huida = 0;
 
+		const int FREC_COST = 40; 
+		const int EXPLORA_3 = 6;
+		const int EXPLORA_N = 8; 
 
-		if(cont_bateria > 0 and current_state.condiciones.bateria){
+
+		if(cont_bateria > 0 and current_state.condiciones.bateria and mapa_recorrido.at(current_state.p_virtual.fil).at(current_state.p_virtual.col).bateria != -1){
 			max = 0;
 			for(int i = 0; i < 16; i++){
 			
@@ -1401,11 +1501,11 @@ Action ComportamientoJugador::think(Sensores sensores){
 					}
 					
 					if(sensores.nivel == 3){
-						if(explora > 6){
+						if(explora > EXPLORA_3){
 							huida = false;
 						}
 					}else{
-						if(explora > 8){
+						if(explora > EXPLORA_N){
 							huida = false;
 						}
 
@@ -1434,10 +1534,10 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 					double disminuir = 0;
 
-					if(frecuencias.at(v.at(i).fil).at(v.at(i).col) > 40 ){
+					if(frecuencias.at(v.at(i).fil).at(v.at(i).col) > FREC_COST ){
 						valor = 0;
 					}else{
-						disminuir = 1 - (1.0*frecuencias.at(v.at(i).fil).at(v.at(i).col))/40;
+						disminuir = 1 - (1.0*frecuencias.at(v.at(i).fil).at(v.at(i).col))/FREC_COST;
 						valor = valor*(disminuir);
 					}
 					
@@ -1446,9 +1546,6 @@ Action ComportamientoJugador::think(Sensores sensores){
 						max = valor;
 						index = i; 
 					}
-					cout << "mover" << endl; 
-					cout << valor << endl;
-					cout << index << endl; 
 
 				}
 			}
@@ -1487,10 +1584,10 @@ Action ComportamientoJugador::think(Sensores sensores){
 							valor = pow(bateria,2) + pow(explora,2);
 						}
 
-						if(frecuencias.at(v.at(i).fil).at(v.at(i).col) > 40){
+						if(frecuencias.at(v.at(i).fil).at(v.at(i).col) > FREC_COST){
 							valor = 0;
 						}else{
-							double disminuir = 1 - (1.0*frecuencias.at(v.at(i).fil).at(v.at(i).col))/40;
+							double disminuir = 1 - (1.0*frecuencias.at(v.at(i).fil).at(v.at(i).col))/FREC_COST;
 							valor = valor*(disminuir);
 						}
 						
@@ -1499,10 +1596,6 @@ Action ComportamientoJugador::think(Sensores sensores){
 							max = valor;
 							index = i; 
 						}
-
-						cout << "huir" << endl; 
-						cout << valor << endl;
-						cout << index << endl; 
 
 					}
 				}

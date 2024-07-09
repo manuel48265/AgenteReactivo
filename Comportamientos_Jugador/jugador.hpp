@@ -4,8 +4,6 @@
 #include "queue"
 #include "cmath"
 #include "iostream"
-#include <chrono>
-#include <thread>
 
 
 using namespace std;
@@ -23,13 +21,6 @@ struct point{
 		this->fil = i;
 		this->col = j;
 	}
-
-  point(int i, int j, int size){
-    int tam = size;
-    this->fil = i;
-		this->col = j;
-	}
-
 
   point(){
     point(0,0);
@@ -254,13 +245,8 @@ class ComportamientoJugador : public Comportamiento{
 
       cont_bateria = 0;
 
-      srand(time(NULL));
-
-      orientacion_deseada = norte; 
-
       huida = false;
-
-      bateria_anterior = 0;
+      origen_huida = point(-1,-1);
 
       no_agentes = vector<bool>();
 
@@ -269,8 +255,7 @@ class ComportamientoJugador : public Comportamiento{
       }
 
       accion_vacia = 0; 
-
-
+      mapa_100 = false; 
       
     }
 
@@ -294,13 +279,12 @@ class ComportamientoJugador : public Comportamiento{
       vector<vector<Importantes>> mapa_recorrido; 
       int cont_bateria; 
       static const int intervalo = 3; 
-      Orientacion orientacion_deseada; 
       bool huida ;
       point origen_huida;
       vector<vector<int>> frecuencias;
-      int bateria_anterior;
       vector<bool> no_agentes;
       int accion_vacia; 
+      bool mapa_100; 
 
 
 
